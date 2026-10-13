@@ -77,7 +77,7 @@ export interface Translations {
 
 export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   en: {
-    appName: 'CodeCraft AgriTech',
+    appName: 'AgriTech',
     appSubtitle: 'Precision Agriculture & Seed Intelligence System',
     offlineMode: 'Offline Mode (Cached Data)',
     onlineMode: 'Live Agri-Network Connected',
@@ -147,7 +147,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   },
 
   hi: {
-    appName: 'कोडक्राफ्ट एग्रीटेक',
+    appName: 'एग्रीटेक',
     appSubtitle: 'सटीक कृषि एवं उन्नत बीज अनुशंसा प्रणाली',
     offlineMode: 'ऑफ़लाइन मोड (कैश डेटा)',
     onlineMode: 'लाइव नेटवर्क कनेक्टेड',
@@ -217,7 +217,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   },
 
   pa: {
-    appName: 'ਕੋਡਕ੍ਰਾਫਟ ਐਗਰੀਟੈਕ',
+    appName: 'ਐਗਰੀਟੈਕ',
     appSubtitle: 'ਸ਼ੁੱਧ ਖੇਤੀਬਾੜੀ ਅਤੇ ਬੀਜ ਸਿਫ਼ਾਰਸ਼ ਪ੍ਰਣਾਲੀ',
     offlineMode: 'ਔਫਲਾਈਨ ਮੋਡ (ਕੈਸ਼ ਡਾਟਾ)',
     onlineMode: 'ਲਾਈਵ ਐਗਰੀ ਨੈੱਟਵਰਕ ਜੁੜਿਆ ਹੋਇਆ ਹੈ',
@@ -287,7 +287,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   },
 
   te: {
-    appName: 'కోడ్‌క్రాఫ్ట్ అగ్రిటెక్',
+    appName: 'అగ్రిటెక్',
     appSubtitle: 'ఖచ్చితమైన వ్యవసాయం & విత్తన సిఫార్సు వ్యవస్థ',
     offlineMode: 'ఆఫ్‌లైన్ మోడ్ (కాష్ డేటా)',
     onlineMode: 'లైవ్ నెట్‌వర్క్ కనెక్ట్ చేయబడింది',
@@ -357,7 +357,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   },
 
   mr: {
-    appName: 'कोडक्राफ्ट ॲग्रीटेक',
+    appName: 'ॲग्रीटेक',
     appSubtitle: 'अचूक शेती आणि बियाणे शिफारस प्रणाली',
     offlineMode: 'ऑफलाइन मोड (कॅश डेटा)',
     onlineMode: 'थेट कृषी नेटवर्क जोडलेले',
@@ -427,7 +427,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   },
 
   gu: {
-    appName: 'કોડક્રાફ્ટ એગ્રીટેક',
+    appName: 'એગ્રીટેક',
     appSubtitle: 'ચોકસાઈભરી ખેતી અને બિયારણ ભલામણ પ્રણાલી',
     offlineMode: 'ઑફલાઇન મોડ (કેશ્ડ ડેટા)',
     onlineMode: 'લાઇવ નેટવર્ક કનેક્ટેડ',

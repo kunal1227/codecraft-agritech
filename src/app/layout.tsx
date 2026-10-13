@@ -13,14 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'CodeCraft Agriculture Advisor — Precision Seed Intelligence',
+  title: 'AgriTech',
   description:
     'Precision crop and seed recommendation system with offline PWA caching, Agmarknet live Mandi prices, soil health diagnostics, and vernacular voice interface.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'CodeCraft',
+    title: 'AgriTech',
   },
   icons: {
     icon: '/icon-192.png',

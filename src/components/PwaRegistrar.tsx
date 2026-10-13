@@ -108,7 +108,7 @@ export function PwaRegistrar({
         <button
           onClick={handleInstallClick}
           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm transition-transform active:scale-95 cursor-pointer"
-          title="Install CodeCraft AgriTech app on your device for one-tap field access"
+          title="Install AgriTech app on your device for one-tap field access"
         >
           <Download className="w-3 h-3" />
           <span>Install App</span>

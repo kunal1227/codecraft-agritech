@@ -183,7 +183,7 @@ export default function Home() {
               <span>Next-Gen Agronomy 2.0</span>
             </div>
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-              {t.appName}: Precision Crop & Seed Intelligence
+              {t.appName}
             </h1>
             <p className="text-sm sm:text-base text-emerald-100/90 max-w-2xl leading-relaxed">
               Empowering farmers with algorithmic seed selection, Agmarknet live Mandi price forecasting,
@@ -461,7 +461,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <Sprout className="w-4 h-4 text-emerald-600" />
             <span className="font-bold text-stone-800 dark:text-stone-200">
-              CodeCraft Precision AgriTech
+              AgriTech
             </span>
             <span>• PWA Offline Ready</span>
           </div>
