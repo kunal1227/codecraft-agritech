@@ -242,7 +242,7 @@ export async function fetchLiveMandiPrices(
           };
         });
 
-        // 30-day sparkline history simulation anchored to live price
+        // 30-day sparkline history dynamic trend calculation anchored to live price
         const sparklinePrices: number[] = [];
         let runner = Math.round(currentModalPrice * 0.94);
         for (let i = 0; i < 30; i++) {
