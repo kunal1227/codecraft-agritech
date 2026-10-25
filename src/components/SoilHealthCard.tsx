@@ -35,8 +35,9 @@ export function SoilHealthCard({ soil }: SoilHealthCardProps) {
             <span className="w-7 h-7 rounded-lg bg-emerald-600/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
               <FlaskConical className="w-4 h-4" />
             </span>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-              Soil Composition & Chemistry
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              {soil.dataSourceBadge || 'Soil Composition & Chemistry'}
             </span>
           </div>
           <h3 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-50 mt-1">

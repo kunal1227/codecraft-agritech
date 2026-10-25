@@ -61,6 +61,8 @@ export interface SoilComposition {
     dosagePerAcre: string;
     purpose: string;
   }[];
+  isLiveApi?: boolean;
+  dataSourceBadge?: string;
 }
 
 export interface MandiArrival {
@@ -90,6 +92,8 @@ export interface MandiMarketData {
     max: number;
     expectedModal: number;
   };
+  isLiveApi?: boolean;
+  dataSourceBadge?: string;
 }
 
 export interface WeatherDayForecast {
@@ -119,6 +123,8 @@ export interface HyperLocalWeather {
     advisoryAction: string;
   }[];
   monsoonStatus: string;
+  isLiveApi?: boolean;
+  dataSourceBadge?: string;
 }
 
 export interface SeedVariety {

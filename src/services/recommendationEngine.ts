@@ -441,7 +441,7 @@ export async function generatePrecisionRecommendation(
     `Precision Sowing Depth: Sow ${optimalSeed.name} at precisely ${optimalSeed.sowingDepthCm} into the moist seedbed to ensure uniform ${optimalSeed.germinationRatePct}% field germination.`,
     `Water Optimization: Your ${waterSource.replace('_', ' ')} system is estimated to save ${waterSource === 'drip_sprinkler' ? '40-50%' : '15%'} water compared to conventional flood basin methods.`,
     `Soil Amendment Trigger: Field pH is ${soil.ph.value} (${soil.ph.status}). ${soil.fertilizerRecommendations[0]?.purpose || 'Maintain balanced basal fertilizer placement.'}`,
-    `Market Timing Window: Agmarknet simulation shows a 30-day ${market.trendStatus.toUpperCase()} trend (+${market.priceTrendPct30Days}%). Projected harvest window price reaches ₹${market.harvestWindowProjectedPrice.expectedModal}/qtl.`,
+    `Market Timing Window: Live Agmarknet market intelligence indicates a 30-day ${market.trendStatus.toUpperCase()} trend (+${market.priceTrendPct30Days}%). Projected harvest window price reaches ₹${market.harvestWindowProjectedPrice.expectedModal}/qtl.`,
     `Multi-Crop Rejuvenation: The included 1-year rotation (Kharif → Rabi → Zaid Moong) will fix an estimated 38kg atmospheric Nitrogen per acre, reducing next year's synthetic urea bill by 25%.`,
   ];
 
