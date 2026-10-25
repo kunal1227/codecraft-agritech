@@ -26,7 +26,7 @@ import {
   ArrowRight,
   Camera,
 } from 'lucide-react';
-import { parseFarmVoiceInput } from '@/utils/speech';
+import { parseFarmVoiceInput, SPEECH_LANG_CODES } from '@/utils/speech';
 
 interface InputDashboardProps {
   initialInput?: Partial<FarmerInput>;
@@ -160,7 +160,7 @@ export function InputDashboard({
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.lang = language === 'hi' ? 'hi-IN' : language === 'pa' ? 'pa-IN' : 'en-IN';
+      recognition.lang = SPEECH_LANG_CODES[language] || 'mr-IN';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
@@ -318,6 +318,54 @@ export function InputDashboard({
             type="button"
             onClick={() =>
               loadPreset({
+                regionIdx: 2,
+                size: 4,
+                unit: 'acres',
+                water: 'drip_sprinkler',
+                level: 'adequate',
+                crop: 'Cotton',
+              })
+            }
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 transition-colors cursor-pointer"
+          >
+            {language === 'mr' ? '🌱 महाराष्ट्र (४ एकर ठिबक कापूस)' : '🌱 Maharashtra (4 Ac Drip Cotton)'}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              loadPreset({
+                regionIdx: 2,
+                size: 5,
+                unit: 'acres',
+                water: 'rainfed',
+                level: 'moderate',
+                crop: 'Soybean',
+              })
+            }
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 hover:bg-emerald-50 dark:bg-stone-800 dark:hover:bg-emerald-950/50 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-emerald-400 transition-colors cursor-pointer"
+          >
+            {language === 'mr' ? '🌻 विदर्भ / लातूर (५ एकर सोयाबीन)' : '🌻 Latur / Vidarbha (5 Ac Soybean)'}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              loadPreset({
+                regionIdx: 2,
+                size: 3,
+                unit: 'acres',
+                water: 'borewell',
+                level: 'adequate',
+                crop: 'Onion',
+              })
+            }
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 hover:bg-emerald-50 dark:bg-stone-800 dark:hover:bg-emerald-950/50 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-emerald-400 transition-colors cursor-pointer"
+          >
+            {language === 'mr' ? '🧅 नाशिक / लासलगाव (३ एकर कांदा)' : '🧅 Nashik (3 Ac Onion)'}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              loadPreset({
                 regionIdx: 0,
                 size: 8,
                 unit: 'acres',
@@ -328,55 +376,7 @@ export function InputDashboard({
             }
             className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 hover:bg-emerald-50 dark:bg-stone-800 dark:hover:bg-emerald-950/50 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-emerald-400 transition-colors cursor-pointer"
           >
-            🌾 Punjab (8 Ac Canal Wheat)
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              loadPreset({
-                regionIdx: 2,
-                size: 4,
-                unit: 'acres',
-                water: 'drip_sprinkler',
-                level: 'adequate',
-                crop: 'Cotton',
-              })
-            }
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 hover:bg-emerald-50 dark:bg-stone-800 dark:hover:bg-emerald-950/50 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-emerald-400 transition-colors cursor-pointer"
-          >
-            🌱 Maharashtra (4 Ac Drip Cotton)
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              loadPreset({
-                regionIdx: 3,
-                size: 6,
-                unit: 'acres',
-                water: 'rainfed',
-                level: 'moderate',
-                crop: 'Soybean',
-              })
-            }
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 hover:bg-emerald-50 dark:bg-stone-800 dark:hover:bg-emerald-950/50 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-emerald-400 transition-colors cursor-pointer"
-          >
-            🌻 MP Malwa (6 Ac Rainfed Soybean)
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              loadPreset({
-                regionIdx: 4,
-                size: 3,
-                unit: 'acres',
-                water: 'borewell',
-                level: 'adequate',
-                crop: 'Chili (Dry)',
-              })
-            }
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 hover:bg-emerald-50 dark:bg-stone-800 dark:hover:bg-emerald-950/50 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-emerald-400 transition-colors cursor-pointer"
-          >
-            🌶️ Andhra (3 Ac Borewell Chili)
+            {language === 'mr' ? '🌾 पंजाब (८ एकर कालवा गहू)' : '🌾 Punjab (8 Ac Canal Wheat)'}
           </button>
         </div>
       </div>

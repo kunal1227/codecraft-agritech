@@ -1,18 +1,31 @@
 'use client';
 
 import { Sprout, TrendingUp, CloudSun, FlaskConical, Camera } from 'lucide-react';
+import { LanguageCode } from '@/types/agriculture';
 
 interface MobileBottomNavProps {
   activeTab: 'overview' | 'seed' | 'mandi' | 'soil' | 'weather' | 'seasonal' | 'roi';
   onTabChange: (tab: 'overview' | 'seed' | 'mandi' | 'soil' | 'weather' | 'seasonal' | 'roi') => void;
   onOpenSoilScanner: () => void;
+  language?: LanguageCode;
 }
 
 export function MobileBottomNav({
   activeTab,
   onTabChange,
   onOpenSoilScanner,
+  language = 'en',
 }: MobileBottomNavProps) {
+  const isMr = language === 'mr';
+  const isHi = language === 'hi';
+
+  const labels = {
+    overview: isMr ? 'आढावा' : isHi ? 'अवलोकन' : 'Overview',
+    mandi: isMr ? 'बाजारभाव' : isHi ? 'मंडी भाव' : 'Mandi',
+    scanSoil: isMr ? 'माती स्कॅन' : isHi ? 'मिट्टी स्कैन' : 'Scan Soil',
+    weather: isMr ? 'हवामान' : isHi ? 'मौसम' : 'Weather',
+    soil: isMr ? 'मृदा आरोग्य' : isHi ? 'मृदा' : 'Soil',
+  };
   return (
     <nav
       aria-label="Mobile Navigation"
@@ -38,7 +51,7 @@ export function MobileBottomNav({
           >
             <Sprout className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Overview</span>
+          <span className="text-[10px] mt-0.5 tracking-tight">{labels.overview}</span>
         </button>
 
         {/* 2. Mandi */}
@@ -60,7 +73,7 @@ export function MobileBottomNav({
           >
             <TrendingUp className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Mandi</span>
+          <span className="text-[10px] mt-0.5 tracking-tight">{labels.mandi}</span>
         </button>
 
         {/* 3. Center Action: AI Soil Camera Scanner */}
@@ -73,7 +86,7 @@ export function MobileBottomNav({
             <Camera className="w-6 h-6 stroke-[2.5]" />
           </button>
           <span className="text-[10px] font-black text-emerald-400 tracking-tight mt-0.5">
-            Scan Soil
+            {labels.scanSoil}
           </span>
         </div>
 
@@ -96,7 +109,7 @@ export function MobileBottomNav({
           >
             <CloudSun className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Weather</span>
+          <span className="text-[10px] mt-0.5 tracking-tight">{labels.weather}</span>
         </button>
 
         {/* 5. Soil Health */}
@@ -118,7 +131,7 @@ export function MobileBottomNav({
           >
             <FlaskConical className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Soil</span>
+          <span className="text-[10px] mt-0.5 tracking-tight">{labels.soil}</span>
         </button>
       </div>
     </nav>

@@ -63,6 +63,20 @@ export function Header({
           <div className="flex items-center gap-2 sm:gap-3">
             <PwaRegistrar onNetworkChange={onNetworkChange} />
 
+            {/* Quick 1-Tap Marathi Pill */}
+            <button
+              type="button"
+              onClick={() => onLanguageChange(language === 'mr' ? 'en' : 'mr')}
+              className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                language === 'mr'
+                  ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                  : 'bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+              }`}
+              title="मराठी भाषेत बदला / Switch to Marathi"
+            >
+              🚩 मराठी
+            </button>
+
             {/* Vernacular Language Selector Dropdown */}
             <div className="relative inline-flex items-center">
               <label htmlFor="language-select" className="sr-only">

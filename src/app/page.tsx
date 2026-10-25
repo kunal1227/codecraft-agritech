@@ -193,9 +193,56 @@ export default function Home() {
               {t.appName}
             </h1>
             <p className="text-sm sm:text-base text-emerald-100/90 max-w-2xl leading-relaxed">
-              Empowering farmers with algorithmic seed selection, Agmarknet live Mandi price forecasting,
-              hyper-local weather spray windows, and 1-year multi-crop Kharif-Rabi-Zaid rotation calendars.
+              {language === 'mr'
+                ? 'अचूक AI बियाणे निवड, थेट बाजारभाव अंदाज, अचूक स्थानिक हवामान, आणि खरीप-रब्बी-उन्हाळी पिकांचे संपूर्ण कृषी नियोजन.'
+                : 'Empowering farmers with algorithmic seed selection, Agmarknet live Mandi price forecasting, hyper-local weather spray windows, and 1-year multi-crop Kharif-Rabi-Zaid rotation calendars.'}
             </p>
+
+            {/* Quick Vernacular 1-Tap Switcher for Farmers */}
+            <div className="pt-2 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-emerald-200/90 font-medium">भाषा / Language:</span>
+              <button
+                type="button"
+                onClick={() => setLanguage('mr')}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  language === 'mr'
+                    ? 'bg-amber-400 text-stone-950 shadow-md shadow-amber-400/30 ring-2 ring-white/50'
+                    : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
+                }`}
+              >
+                🚩 मराठी (Marathi)
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('hi')}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  language === 'hi'
+                    ? 'bg-amber-400 text-stone-950 shadow-md shadow-amber-400/30 ring-2 ring-white/50'
+                    : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
+                }`}
+              >
+                🇮🇳 हिंदी (Hindi)
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  language === 'en'
+                    ? 'bg-amber-400 text-stone-950 shadow-md shadow-amber-400/30 ring-2 ring-white/50'
+                    : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
+                }`}
+              >
+                🌐 English
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSoilScannerOpen(true)}
+                className="ml-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-400 hover:bg-emerald-300 text-stone-950 transition-all shadow-md shadow-emerald-950/40 cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                {language === 'mr' ? '📸 AI माती स्कॅन करा' : '📸 AI Scan Soil'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -512,7 +559,9 @@ export default function Home() {
           };
           handleGenerate(updatedInput);
           setToastMessage(
-            `✨ AI Soil Vision Applied: Classified ${detectedSoilType.replace('_', ' ')} & predicted ${recommendedCrop}! Full farm plan recalculated.`
+            language === 'mr'
+              ? `✨ AI माती दृष्टी लागू: माती प्रकार निश्चित आणि ${recommendedCrop} पिकासाठी संपूर्ण नियोजन तयार!`
+              : `✨ AI Soil Vision Applied: Classified ${detectedSoilType.replace('_', ' ')} & predicted ${recommendedCrop}! Full farm plan recalculated.`
           );
           setTimeout(() => setToastMessage(''), 5000);
         }}
@@ -523,6 +572,7 @@ export default function Home() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenSoilScanner={() => setIsSoilScannerOpen(true)}
+        language={language}
       />
 
       {/* Footer */}

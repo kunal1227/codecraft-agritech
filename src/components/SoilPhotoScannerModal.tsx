@@ -231,19 +231,36 @@ export function SoilPhotoScannerModal({
     setSoilAnalysis(null);
     setSeedPrediction(null);
 
+    const isMr = language === 'mr';
     // Staged animated progress HUD
-    setScanProgressStage('Extracting RGB Spectral Channels & Hue Pigmentation...');
+    setScanProgressStage(
+      isMr
+        ? 'RGB वर्णपट आणि रंगद्रव्याचे विश्लेषण सुरू आहे...'
+        : 'Extracting RGB Spectral Channels & Hue Pigmentation...'
+    );
 
     setTimeout(() => {
-      setScanProgressStage('Analyzing Sand-Silt-Clay Granularity & Texture...');
+      setScanProgressStage(
+        isMr
+          ? 'वाळू, गाळ आणि चिकणमाती प्रमाणाचे विश्लेषण सुरू आहे...'
+          : 'Analyzing Sand-Silt-Clay Granularity & Texture...'
+      );
     }, 450);
 
     setTimeout(() => {
-      setScanProgressStage('Matching with Trained Soil Model Centroids...');
+      setScanProgressStage(
+        isMr
+          ? 'प्रशिक्षित AI माती मॉडेलशी नमुना जुळवला जात आहे...'
+          : 'Matching with Trained Soil Model Centroids...'
+      );
     }, 900);
 
     setTimeout(() => {
-      setScanProgressStage('Synthesizing Rainfall Forecast & Predicting Seed Cultivars...');
+      setScanProgressStage(
+        isMr
+          ? 'स्थानिक हवामान, पाऊस आणि सर्वोत्तम बियाणे जातींचा अंदाज घेत आहे...'
+          : 'Synthesizing Rainfall Forecast & Predicting Seed Cultivars...'
+      );
 
       const ctx = canvas.getContext('2d');
       if (ctx) {
@@ -298,7 +315,10 @@ export function SoilPhotoScannerModal({
   const handlePlayVoice = () => {
     if (!seedPrediction || !soilAnalysis) return;
     setIsPlayingAudio(true);
-    const text = `AgriTech AI Soil Analysis: Detected ${soilAnalysis.soilTypeName} with ${soilAnalysis.confidencePct}% confidence. Based on ${rainCondition.replace('_', ' ')} rainfall conditions, recommended seed is ${seedPrediction.primarySeed.name} (${seedPrediction.cropName}) with expected yield of ${seedPrediction.expectedYieldQuintalsPerAcre} quintals per acre. Sowing window: ${seedPrediction.sowingWindow}.`;
+    const text =
+      language === 'mr'
+        ? `ॲग्रीटेक एआय माती विश्लेषण: आपल्या शेतात ${soilAnalysis.soilTypeName} प्रकारची माती आढळली असून अचूकता ${soilAnalysis.confidencePct}% आहे. स्थानिक हवामान व पाऊस स्थितीनुसार, आपल्या शेतीसाठी सर्वोत्तम बियाणे ${seedPrediction.primarySeed.name} (${seedPrediction.cropName}) आहे. अपेक्षित उत्पादन ${seedPrediction.expectedYieldQuintalsPerAcre} क्विंटल प्रति एकर राहील. पेरणीचा योग्य कालावधी ${seedPrediction.sowingWindow} आहे.`
+        : `AgriTech AI Soil Analysis: Detected ${soilAnalysis.soilTypeName} with ${soilAnalysis.confidencePct}% confidence. Based on ${rainCondition.replace('_', ' ')} rainfall conditions, recommended seed is ${seedPrediction.primarySeed.name} (${seedPrediction.cropName}) with expected yield of ${seedPrediction.expectedYieldQuintalsPerAcre} quintals per acre. Sowing window: ${seedPrediction.sowingWindow}.`;
 
     speakAdvisory(text, language, () => {
       setIsPlayingAudio(false);
@@ -315,6 +335,62 @@ export function SoilPhotoScannerModal({
 
   if (!isOpen) return null;
 
+  const isMr = language === 'mr';
+  const SAMPLE_SOIL_NAMES_MR: Record<string, { name: string; region: string }> = {
+    sample_black_cotton: { name: 'काळी रेगूर माती (दख्खन पठार)', region: 'विदर्भ, मराठवाडा, खान्देश' },
+    sample_alluvial_loam: { name: 'गाळाची सुपीक माती (पोयटा)', region: 'नदी खोरे, उत्तर भारतीय मैदाने' },
+    sample_red_soil: { name: 'लाल तांबडी जांभी माती', region: 'कोकण, पश्चिम घाट, दक्षिण पठार' },
+    sample_sandy_loam: { name: 'हलकी वाळूयुक्त पोयटा माती', region: 'अवर्षणग्रस्त भाग, किनारी पट्टी' },
+  };
+
+  const textDict = {
+    title: isMr ? 'AgriTech AI माती दृष्टी आणि बियाणे अंदाज' : 'AgriTech AI Soil Vision',
+    subtitle: isMr
+      ? 'मातीचा फोटो काढा किंवा अपलोड करा • संगणक दृष्टी मातीचे विश्लेषण करते • अचूक बियाणे सुचवते'
+      : 'Snap or upload soil photo • Computer Vision classifies soil matrix • AI predicts high-yielding seeds',
+    liveCamera: isMr ? 'थेट कॅमेरा' : 'Live Camera',
+    gallery: isMr ? 'गॅलरीमधून निवडा' : 'Gallery',
+    sampleSoils: isMr ? 'मातीचे नमुने' : 'Sample Soils',
+    reticle: isMr ? 'चौकोनात स्वच्छ मातीचा नमुना ठेवा (पाने/कचरा बाजूला करा)' : 'Align clear soil sample in box (remove leaves/dry grass)',
+    chooseFromDevice: isMr ? 'डिव्हाइसमधून फोटो निवडा' : 'Choose Photo from Device',
+    tapToSnapOrUpload: isMr ? 'फोटो काढण्यासाठी किंवा गॅलरीतून निवडण्यासाठी टॅप करा' : 'Tap to snap photo or choose from gallery',
+    sunlightHint: isMr ? 'नैसर्गिक सूर्यप्रकाशातील फोटो सर्वाधिक अचूक निकाल देतात.' : 'Natural sunlight photos provide highest spectral accuracy.',
+    samplePresetHint: isMr ? 'AI माती वर्गीकरण व बियाणे अंदाज तात्काळ तपासण्यासाठी प्रमाणित माती नमुना निवडा:' : 'Select a calibrated archetype soil sample to test the AI classification and seed prediction pipeline instantly:',
+    retake: isMr ? 'पुन्हा फोटो काढा' : 'Retake / New Photo',
+    fieldCaptured: isMr ? 'शेतातील मातीचा नमुना निश्चित' : 'Field Sample Captured',
+    scanning: isMr ? 'AI माती विश्लेषण सुरू आहे...' : 'AI Vision Analysis in Progress...',
+    confidence: isMr ? 'अचूकता' : 'Confidence',
+    clay: isMr ? 'चिकणमाती' : 'Clay Content',
+    silt: isMr ? 'गाळ' : 'Silt Content',
+    ph: isMr ? 'अंदाज pH' : 'Estimated pH',
+    weatherTitle: isMr ? 'स्थानिक हवामान आणि पाऊस स्थिती' : 'Regional Weather & Rainfall Parameters',
+    autoWeather: isMr ? '🌦️ थेट हवामान' : '🌦️ Auto Live Weather',
+    autoWeatherDesc: isMr ? 'ओपन-मेटिओ अंदाज वापरा' : 'Use Open-Meteo forecast',
+    highMonsoon: isMr ? '🌧️ मुसळधार पाऊस' : '🌧️ High Monsoon',
+    highMonsoonDesc: isMr ? '>११०० मिमी पाऊस' : '>1,100 mm heavy rain',
+    moderateRain: isMr ? '⛅ मध्यम पाऊस' : '⛅ Moderate Rain',
+    moderateRainDesc: isMr ? '६००-९०० मिमी हंगामी' : '600–900 mm seasonal',
+    lowRain: isMr ? '☀️ कमी पाऊस / दुष्काळ' : '☀️ Low Rain / Arid',
+    lowRainDesc: isMr ? '<४५० मिमी कोरडवाहू' : '<450 mm drought risk',
+    seedTitle: isMr ? 'AI शिफारस केलेले सर्वोत्तम बियाणे जात' : 'AI Predicted Optimal Seed Cultivar',
+    breeder: isMr ? 'संशोधन संस्था' : 'Breeder',
+    matchScore: isMr ? 'अनुकूलता जुळणी' : 'Compatibility Match',
+    expectedYield: isMr ? 'अपेक्षित उत्पादन' : 'Expected Yield',
+    qtlAcre: isMr ? 'क्विंटल / एकर' : 'Qtl/Acre',
+    underRain: isMr ? 'पाऊस स्थितीनुसार' : 'Under tuned rainfall',
+    sowingWindow: isMr ? 'पेरणीची योग्य वेळ' : 'Sowing Window',
+    timelySowing: isMr ? 'हंगामी वेळेवर पेरणी' : 'Timely seasonal sowing',
+    seedRate: isMr ? 'बियाणे प्रमाण' : 'Seed Rate',
+    certifiedGerm: isMr ? 'प्रमाणित उगवण क्षमता ९४%' : 'Certified germination 94%',
+    waterNeeds: isMr ? 'पाण्याची गरज' : 'Water Needs',
+    droughtBuiltIn: isMr ? 'दुष्काळ प्रतिकारकता सक्षम' : 'Drought resilience built-in',
+    soilMatch: isMr ? 'माती अनुकूलता: ' : 'Soil Match: ',
+    rainMatch: isMr ? 'पाऊस अनुकूलता: ' : 'Rainfall Match: ',
+    altCultivars: isMr ? 'पर्यायी अधिक उत्पादन देणाऱ्या इतर जाती' : 'Alternative High-Compatibility Cultivars',
+    applyBtn: isMr ? 'शेती डॅशबोर्डवर लागू करा आणि नफा मोजा' : 'Apply to Farm Dashboard & Calculate Full ROI',
+    scanAnother: isMr ? 'दुसरा नमुना तपासा' : 'Scan Another Soil',
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
       <div className="relative w-full max-w-4xl max-h-[94dvh] sm:max-h-[90vh] overflow-y-auto bg-stone-900 border border-emerald-500/30 rounded-t-3xl sm:rounded-3xl shadow-2xl text-stone-100 p-4 sm:p-7 pb-8">
@@ -330,14 +406,14 @@ export function SoilPhotoScannerModal({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg sm:text-2xl font-black text-white">
-                  AgriTech AI Soil Vision
+                  {textDict.title}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                   Vision Model
                 </span>
               </div>
               <p className="text-xs text-stone-400 mt-0.5 line-clamp-1 sm:line-clamp-none">
-                Snap or upload soil photo • Computer Vision classifies soil matrix • AI predicts high-yielding seeds
+                {textDict.subtitle}
               </p>
             </div>
           </div>
@@ -366,7 +442,7 @@ export function SoilPhotoScannerModal({
                 }`}
               >
                 <Camera className="w-4 h-4 shrink-0" />
-                Live Camera
+                {textDict.liveCamera}
               </button>
               <button
                 onClick={() => setInputMode('upload')}
@@ -377,7 +453,7 @@ export function SoilPhotoScannerModal({
                 }`}
               >
                 <Upload className="w-4 h-4 shrink-0" />
-                Gallery
+                {textDict.gallery}
               </button>
               <button
                 onClick={() => setInputMode('samples')}
@@ -388,7 +464,7 @@ export function SoilPhotoScannerModal({
                 }`}
               >
                 <Sparkles className="w-4 h-4 shrink-0" />
-                Sample Soils
+                {textDict.sampleSoils}
               </button>
             </div>
           )}
@@ -406,7 +482,7 @@ export function SoilPhotoScannerModal({
                         onClick={() => fileInputRef.current?.click()}
                         className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold min-h-[44px]"
                       >
-                        Choose Photo from Device
+                        {textDict.chooseFromDevice}
                       </button>
                     </div>
                   ) : (
@@ -424,7 +500,7 @@ export function SoilPhotoScannerModal({
                           <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
                         </div>
                         <span className="mt-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-sm text-[10px] sm:text-[11px] font-bold text-emerald-300 border border-emerald-500/30 text-center">
-                          Align clear soil sample in box (remove leaves/dry grass)
+                          {textDict.reticle}
                         </span>
                       </div>
 
@@ -467,10 +543,10 @@ export function SoilPhotoScannerModal({
                     <Upload className="w-8 h-8" />
                   </div>
                   <h4 className="text-sm sm:text-base font-bold text-white mt-4 text-center">
-                    Tap to snap photo or choose from gallery
+                    {textDict.tapToSnapOrUpload}
                   </h4>
                   <p className="text-xs text-stone-400 mt-1 max-w-sm text-center">
-                    Natural sunlight photos provide highest spectral accuracy.
+                    {textDict.sunlightHint}
                   </p>
                   <input
                     ref={fileInputRef}
@@ -487,32 +563,42 @@ export function SoilPhotoScannerModal({
               {inputMode === 'samples' && (
                 <div>
                   <p className="text-xs text-stone-400 mb-3">
-                    Select a calibrated archetype soil sample to test the AI classification and seed prediction pipeline instantly:
+                    {textDict.samplePresetHint}
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {SAMPLE_SOIL_PRESETS.map((sample) => (
-                      <button
-                        key={sample.id}
-                        onClick={() => handleSelectSample(sample)}
-                        className="group flex flex-col items-center p-4 rounded-2xl bg-stone-950 border border-stone-800 hover:border-emerald-500/60 hover:bg-stone-800/40 text-left transition-all"
-                      >
-                        <div
-                          className={`w-full h-20 rounded-xl mb-3 bg-gradient-to-br ${sample.bgGradient} flex items-center justify-center shadow-inner border border-white/10 group-hover:scale-105 transition-transform`}
+                    {SAMPLE_SOIL_PRESETS.map((sample) => {
+                      const sampleName =
+                        isMr && SAMPLE_SOIL_NAMES_MR[sample.id]
+                          ? SAMPLE_SOIL_NAMES_MR[sample.id].name
+                          : sample.name;
+                      const sampleRegion =
+                        isMr && SAMPLE_SOIL_NAMES_MR[sample.id]
+                          ? SAMPLE_SOIL_NAMES_MR[sample.id].region
+                          : sample.region;
+                      return (
+                        <button
+                          key={sample.id}
+                          onClick={() => handleSelectSample(sample)}
+                          className="group flex flex-col items-center p-4 rounded-2xl bg-stone-950 border border-stone-800 hover:border-emerald-500/60 hover:bg-stone-800/40 text-left transition-all"
                         >
-                          <span className="text-[10px] uppercase font-bold text-white/90 bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">
-                            {sample.dominantColorHex}
-                          </span>
-                        </div>
-                        <div className="w-full">
-                          <h5 className="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors">
-                            {sample.name}
-                          </h5>
-                          <p className="text-[10px] text-stone-400 mt-0.5 line-clamp-1">
-                            {sample.region}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
+                          <div
+                            className={`w-full h-20 rounded-xl mb-3 bg-gradient-to-br ${sample.bgGradient} flex items-center justify-center shadow-inner border border-white/10 group-hover:scale-105 transition-transform`}
+                          >
+                            <span className="text-[10px] uppercase font-bold text-white/90 bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                              {sample.dominantColorHex}
+                            </span>
+                          </div>
+                          <div className="w-full">
+                            <h5 className="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors">
+                              {sampleName}
+                            </h5>
+                            <p className="text-[10px] text-stone-400 mt-0.5 line-clamp-1">
+                              {sampleRegion}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -538,14 +624,14 @@ export function SoilPhotoScannerModal({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Field Sample Captured
+                      {textDict.fieldCaptured}
                     </span>
                     <button
                       onClick={handleReset}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-xs font-bold text-stone-300 transition-colors"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
-                      Retake / New Photo
+                      {textDict.retake}
                     </button>
                   </div>
 
@@ -554,7 +640,7 @@ export function SoilPhotoScannerModal({
                       <div className="flex items-center gap-3">
                         <RefreshCw className="w-5 h-5 text-emerald-400 animate-spin" />
                         <div>
-                          <div className="text-sm font-bold text-white">AI Vision Analysis in Progress...</div>
+                          <div className="text-sm font-bold text-white">{textDict.scanning}</div>
                           <div className="text-xs text-emerald-400 font-mono mt-0.5">
                             {scanProgressStage}
                           </div>
@@ -568,7 +654,7 @@ export function SoilPhotoScannerModal({
                           {soilAnalysis.soilTypeName}
                         </h3>
                         <span className="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                          {soilAnalysis.confidencePct}% Confidence
+                          {soilAnalysis.confidencePct}% {textDict.confidence}
                         </span>
                       </div>
                       <p className="text-xs text-stone-400">
@@ -578,19 +664,19 @@ export function SoilPhotoScannerModal({
                       {/* Texture Metrics */}
                       <div className="grid grid-cols-3 gap-2 pt-2">
                         <div className="p-2 rounded-xl bg-stone-900 border border-stone-800 text-center">
-                          <div className="text-[10px] text-stone-400 font-bold uppercase">Clay Content</div>
+                          <div className="text-[10px] text-stone-400 font-bold uppercase">{textDict.clay}</div>
                           <div className="text-sm font-black text-emerald-400">
                             {soilAnalysis.textureBreakdown.clayPct}%
                           </div>
                         </div>
                         <div className="p-2 rounded-xl bg-stone-900 border border-stone-800 text-center">
-                          <div className="text-[10px] text-stone-400 font-bold uppercase">Silt Content</div>
+                          <div className="text-[10px] text-stone-400 font-bold uppercase">{textDict.silt}</div>
                           <div className="text-sm font-black text-amber-400">
                             {soilAnalysis.textureBreakdown.siltPct}%
                           </div>
                         </div>
                         <div className="p-2 rounded-xl bg-stone-900 border border-stone-800 text-center">
-                          <div className="text-[10px] text-stone-400 font-bold uppercase">Estimated pH</div>
+                          <div className="text-[10px] text-stone-400 font-bold uppercase">{textDict.ph}</div>
                           <div className="text-sm font-black text-blue-400">
                             {soilAnalysis.estimatedPh}
                           </div>
@@ -608,13 +694,13 @@ export function SoilPhotoScannerModal({
                     <div className="flex items-center gap-2">
                       <CloudRain className="w-4 h-4 text-blue-400" />
                       <span className="text-xs font-bold text-white">
-                        Regional Weather & Rainfall Parameters
+                        {textDict.weatherTitle}
                       </span>
                     </div>
                     {liveWeather && (
                       <span className="text-[11px] font-medium text-emerald-400 flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        Live Open-Meteo: {location.district}, {location.state} ({liveWeather.currentTemp}°C)
+                        {isMr ? 'थेट ओपन-मेटिओ:' : 'Live Open-Meteo:'} {location.district}, {location.state} ({liveWeather.currentTemp}°C)
                       </span>
                     )}
                   </div>
@@ -628,8 +714,8 @@ export function SoilPhotoScannerModal({
                           : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700'
                       }`}
                     >
-                      <div className="text-[11px] font-black">🌦️ Auto Live Weather</div>
-                      <div className="text-[10px] opacity-80 mt-0.5">Use Open-Meteo forecast</div>
+                      <div className="text-[11px] font-black">{textDict.autoWeather}</div>
+                      <div className="text-[10px] opacity-80 mt-0.5">{textDict.autoWeatherDesc}</div>
                     </button>
 
                     <button
@@ -640,8 +726,8 @@ export function SoilPhotoScannerModal({
                           : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700'
                       }`}
                     >
-                      <div className="text-[11px] font-black">🌧️ High Monsoon</div>
-                      <div className="text-[10px] opacity-80 mt-0.5">&gt;1,100 mm heavy rain</div>
+                      <div className="text-[11px] font-black">{textDict.highMonsoon}</div>
+                      <div className="text-[10px] opacity-80 mt-0.5">{textDict.highMonsoonDesc}</div>
                     </button>
 
                     <button
@@ -652,8 +738,8 @@ export function SoilPhotoScannerModal({
                           : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700'
                       }`}
                     >
-                      <div className="text-[11px] font-black">⛅ Moderate Rain</div>
-                      <div className="text-[10px] opacity-80 mt-0.5">600–900 mm seasonal</div>
+                      <div className="text-[11px] font-black">{textDict.moderateRain}</div>
+                      <div className="text-[10px] opacity-80 mt-0.5">{textDict.moderateRainDesc}</div>
                     </button>
 
                     <button
@@ -664,8 +750,8 @@ export function SoilPhotoScannerModal({
                           : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700'
                       }`}
                     >
-                      <div className="text-[11px] font-black">☀️ Low Rain / Arid</div>
-                      <div className="text-[10px] opacity-80 mt-0.5">&lt;450 mm drought risk</div>
+                      <div className="text-[11px] font-black">{textDict.lowRain}</div>
+                      <div className="text-[10px] opacity-80 mt-0.5">{textDict.lowRainDesc}</div>
                     </button>
                   </div>
                 </div>
@@ -681,21 +767,21 @@ export function SoilPhotoScannerModal({
                           <Sparkles className="w-4 h-4" />
                         </span>
                         <span className="text-[11px] font-black uppercase tracking-wider text-amber-400">
-                          AI Predicted Optimal Seed Cultivar
+                          {textDict.seedTitle}
                         </span>
                       </div>
                       <h4 className="text-xl sm:text-2xl font-black text-white mt-1">
                         {seedPrediction.primarySeed.name} ({seedPrediction.cropName})
                       </h4>
                       <p className="text-xs text-stone-300 mt-0.5">
-                        Breeder: {seedPrediction.primarySeed.breeder}
+                        {textDict.breeder}: {seedPrediction.primarySeed.breeder}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <div className="text-[10px] uppercase font-bold text-stone-400">
-                          Compatibility Match
+                          {textDict.matchScore}
                         </div>
                         <div className="text-2xl font-black text-emerald-400">
                           {seedPrediction.compatibilityScore}%
@@ -708,7 +794,7 @@ export function SoilPhotoScannerModal({
                             ? 'bg-amber-500 text-stone-950 border-amber-400 animate-pulse'
                             : 'bg-stone-800 hover:bg-stone-700 text-emerald-400 border-stone-700'
                         }`}
-                        title="Listen to audio readout"
+                        title={isMr ? "मराठी आवाजात ऐका" : "Listen to audio readout"}
                       >
                         <Volume2 className="w-5 h-5" />
                       </button>
@@ -718,36 +804,36 @@ export function SoilPhotoScannerModal({
                   {/* Seed Yield & Sowing Metric Strip */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                     <div className="p-3 rounded-2xl bg-stone-900/80 border border-stone-800">
-                      <div className="text-[10px] text-stone-400 font-bold uppercase">Expected Yield</div>
+                      <div className="text-[10px] text-stone-400 font-bold uppercase">{textDict.expectedYield}</div>
                       <div className="text-base sm:text-lg font-black text-emerald-300 mt-0.5">
-                        {seedPrediction.expectedYieldQuintalsPerAcre} Qtl/Acre
+                        {seedPrediction.expectedYieldQuintalsPerAcre} {textDict.qtlAcre}
                       </div>
-                      <div className="text-[10px] text-stone-400 mt-0.5">Under tuned rainfall</div>
+                      <div className="text-[10px] text-stone-400 mt-0.5">{textDict.underRain}</div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-stone-900/80 border border-stone-800">
-                      <div className="text-[10px] text-stone-400 font-bold uppercase">Sowing Window</div>
+                      <div className="text-[10px] text-stone-400 font-bold uppercase">{textDict.sowingWindow}</div>
                       <div className="text-xs sm:text-sm font-bold text-stone-100 mt-0.5">
                         {seedPrediction.sowingWindow}
                       </div>
-                      <div className="text-[10px] text-stone-400 mt-0.5">Timely seasonal sowing</div>
+                      <div className="text-[10px] text-stone-400 mt-0.5">{textDict.timelySowing}</div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-stone-900/80 border border-stone-800">
-                      <div className="text-[10px] text-stone-400 font-bold uppercase">Seed Rate</div>
+                      <div className="text-[10px] text-stone-400 font-bold uppercase">{textDict.seedRate}</div>
                       <div className="text-xs sm:text-sm font-bold text-stone-100 mt-0.5">
                         {seedPrediction.primarySeed.seedRatePerAcre}
                       </div>
-                      <div className="text-[10px] text-stone-400 mt-0.5">Certified germination 94%</div>
+                      <div className="text-[10px] text-stone-400 mt-0.5">{textDict.certifiedGerm}</div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-stone-900/80 border border-stone-800">
-                      <div className="text-[10px] text-stone-400 font-bold uppercase">Water Needs</div>
+                      <div className="text-[10px] text-stone-400 font-bold uppercase">{textDict.waterNeeds}</div>
                       <div className="text-xs sm:text-sm font-bold text-blue-300 mt-0.5 flex items-center gap-1">
                         <Droplets className="w-3.5 h-3.5" />
-                        {seedPrediction.waterRequirement} Requirement
+                        {seedPrediction.waterRequirement}
                       </div>
-                      <div className="text-[10px] text-stone-400 mt-0.5">Drought resilience built-in</div>
+                      <div className="text-[10px] text-stone-400 mt-0.5">{textDict.droughtBuiltIn}</div>
                     </div>
                   </div>
 
@@ -756,14 +842,14 @@ export function SoilPhotoScannerModal({
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       <p>
-                        <strong className="text-white">Soil Match: </strong>
+                        <strong className="text-white">{textDict.soilMatch}</strong>
                         {seedPrediction.soilSuitabilityNote}
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                       <p>
-                        <strong className="text-white">Rainfall Match: </strong>
+                        <strong className="text-white">{textDict.rainMatch}</strong>
                         {seedPrediction.rainfallSuitabilityNote}
                       </p>
                     </div>
@@ -773,7 +859,7 @@ export function SoilPhotoScannerModal({
                   {seedPrediction.alternativeSeeds.length > 0 && (
                     <div className="pt-2">
                       <div className="text-xs font-bold text-stone-400 mb-2 uppercase tracking-wider">
-                        Alternative High-Compatibility Cultivars
+                        {textDict.altCultivars}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {seedPrediction.alternativeSeeds.map((alt, idx) => (
@@ -793,7 +879,7 @@ export function SoilPhotoScannerModal({
                               </div>
                             </div>
                             <div className="text-[10px] text-stone-400 mt-2">
-                              Est. {alt.expectedYield} Qtl/Acre
+                              {isMr ? 'अंदाजे' : 'Est.'} {alt.expectedYield} {textDict.qtlAcre}
                             </div>
                           </div>
                         ))}
@@ -808,14 +894,14 @@ export function SoilPhotoScannerModal({
                       className="w-full sm:flex-1 py-3 px-5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 transition-all hover:scale-[1.01]"
                     >
                       <Sprout className="w-4 h-4" />
-                      Apply to Farm Dashboard & Calculate Full ROI
+                      {textDict.applyBtn}
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </button>
                     <button
                       onClick={handleReset}
                       className="w-full sm:w-auto py-3 px-5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs transition-colors"
                     >
-                      Scan Another Soil
+                      {textDict.scanAnother}
                     </button>
                   </div>
                 </div>
