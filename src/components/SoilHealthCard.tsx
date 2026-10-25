@@ -9,13 +9,15 @@ import {
   Info,
   Droplet,
   Layers,
+  Camera,
 } from 'lucide-react';
 
 interface SoilHealthCardProps {
   soil: SoilComposition;
+  onOpenSoilScanner?: () => void;
 }
 
-export function SoilHealthCard({ soil }: SoilHealthCardProps) {
+export function SoilHealthCard({ soil, onOpenSoilScanner }: SoilHealthCardProps) {
   const getStatusColor = (status: 'deficient' | 'optimal' | 'excess' | 'low' | 'medium' | 'high' | 'acidic' | 'neutral' | 'alkaline') => {
     if (status === 'optimal' || status === 'medium' || status === 'neutral') {
       return 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800';
@@ -48,16 +50,29 @@ export function SoilHealthCard({ soil }: SoilHealthCardProps) {
           </p>
         </div>
 
-        {/* Soil Health Score Badge */}
-        <div className="flex items-center gap-3 bg-stone-50 dark:bg-stone-800/60 px-4 py-2 rounded-2xl border border-stone-200 dark:border-stone-700 self-start sm:self-auto">
-          <div className="text-right">
-            <div className="text-[10px] uppercase font-bold text-stone-400">Soil Health Score</div>
-            <div className="text-xl font-black text-emerald-700 dark:text-emerald-400">
-              {soil.healthScore}/100
+        {/* Actions: Scan Photo & Soil Health Score Badge */}
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {onOpenSoilScanner && (
+            <button
+              type="button"
+              onClick={onOpenSoilScanner}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition-all hover:scale-[1.02] cursor-pointer"
+            >
+              <Camera className="w-4 h-4" />
+              <span>Scan by Photo</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-3 bg-stone-50 dark:bg-stone-800/60 px-4 py-2 rounded-2xl border border-stone-200 dark:border-stone-700">
+            <div className="text-right">
+              <div className="text-[10px] uppercase font-bold text-stone-400">Soil Health Score</div>
+              <div className="text-xl font-black text-emerald-700 dark:text-emerald-400">
+                {soil.healthScore}/100
+              </div>
             </div>
-          </div>
-          <div className="w-9 h-9 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center">
-            <Sprout className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center">
+              <Sprout className="w-5 h-5" />
+            </div>
           </div>
         </div>
       </div>

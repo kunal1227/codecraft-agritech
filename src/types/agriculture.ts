@@ -213,3 +213,48 @@ export interface SavedPlan {
   expectedProfit: number;
   result: RecommendationResult;
 }
+
+export type RainCondition = 'auto_weather' | 'high_rain' | 'moderate_rain' | 'low_arid';
+
+export interface SoilVisionAnalysis {
+  soilType: SoilType;
+  soilTypeName: string;
+  confidencePct: number;
+  textureBreakdown: {
+    clayPct: number;
+    siltPct: number;
+    sandPct: number;
+  };
+  estimatedOrganicCarbon: number;
+  estimatedPh: number;
+  waterRetentionCapacity: 'Low' | 'Moderate' | 'High' | 'Very High';
+  dominantColorHex: string;
+  colorDescription: string;
+  visualKeyFeatures: string[];
+  classProbabilities: {
+    soilType: SoilType;
+    name: string;
+    probability: number;
+  }[];
+  capturedImagePreviewUrl?: string;
+}
+
+export interface SeedPredictionResult {
+  primarySeed: SeedVariety;
+  cropName: string;
+  compatibilityScore: number;
+  expectedYieldQuintalsPerAcre: number;
+  matchReasoning: string;
+  soilSuitabilityNote: string;
+  rainfallSuitabilityNote: string;
+  sowingWindow: string;
+  waterRequirement: 'Low' | 'Medium' | 'High';
+  alternativeSeeds: {
+    crop: string;
+    varietyName: string;
+    matchScore: number;
+    expectedYield: number;
+    reason: string;
+  }[];
+}
+

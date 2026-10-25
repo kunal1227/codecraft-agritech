@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   Layers,
   ArrowRight,
+  Camera,
 } from 'lucide-react';
 import { parseFarmVoiceInput } from '@/utils/speech';
 
@@ -32,6 +33,7 @@ interface InputDashboardProps {
   language: LanguageCode;
   onGenerate: (input: FarmerInput) => void;
   isLoading: boolean;
+  onOpenSoilScanner?: () => void;
 }
 
 const REGIONS: LocationData[] = [
@@ -66,6 +68,7 @@ export function InputDashboard({
   language,
   onGenerate,
   isLoading,
+  onOpenSoilScanner,
 }: InputDashboardProps) {
   const t = TRANSLATIONS[language];
 
@@ -269,6 +272,39 @@ export function InputDashboard({
         <div className="my-3 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2">
           <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
           <span>{voiceFeedback}</span>
+        </div>
+      )}
+
+      {/* AI Soil Scanner Callout Banner */}
+      {onOpenSoilScanner && (
+        <div className="my-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950 via-stone-900 to-emerald-950 border border-emerald-500/40 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl shadow-emerald-950/20">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/40 shadow-inner">
+              <Camera className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-black text-white">
+                  Train AI & Predict: Soil Photo Scanner
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-stone-950">
+                  Vision Model
+                </span>
+              </div>
+              <p className="text-xs text-stone-300 mt-0.5">
+                Capture or upload soil photo • Computer Vision classifies soil matrix • AI synthesizes regional rainfall & forecasts to predict high-yielding seed cultivars.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpenSoilScanner}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer shrink-0"
+          >
+            <Camera className="w-4 h-4" />
+            <span>Scan Soil Photo</span>
+          </button>
         </div>
       )}
 

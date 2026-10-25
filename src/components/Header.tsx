@@ -1,6 +1,6 @@
 'use client';
 
-import { Sprout, Globe, BookmarkCheck, Sparkles } from 'lucide-react';
+import { Sprout, Globe, BookmarkCheck, Sparkles, Camera } from 'lucide-react';
 import { LanguageCode } from '@/types/agriculture';
 import { TRANSLATIONS } from '@/utils/translations';
 import { PwaRegistrar } from './PwaRegistrar';
@@ -12,6 +12,7 @@ interface HeaderProps {
   onOpenSavedPlans: () => void;
   isOnline: boolean;
   onNetworkChange: (online: boolean) => void;
+  onOpenSoilScanner?: () => void;
 }
 
 const LANGUAGES: { code: LanguageCode; label: string; native: string }[] = [
@@ -29,6 +30,7 @@ export function Header({
   savedPlansCount,
   onOpenSavedPlans,
   onNetworkChange,
+  onOpenSoilScanner,
 }: HeaderProps) {
   const t = TRANSLATIONS[language];
 
@@ -86,6 +88,19 @@ export function Header({
                 </select>
               </div>
             </div>
+
+            {/* AI Soil Photo Scanner Button */}
+            {onOpenSoilScanner && (
+              <button
+                type="button"
+                onClick={onOpenSoilScanner}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-bold hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-stone-950 transition-all active:scale-95 cursor-pointer shadow-xs"
+                title="Scan Soil Photo with AI"
+              >
+                <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:text-inherit" />
+                <span className="hidden sm:inline">Scan Soil</span>
+              </button>
+            )}
 
             {/* Offline Saved Plans Button */}
             <button

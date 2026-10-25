@@ -18,6 +18,7 @@ import { RoiComparisonCard } from '@/components/RoiComparisonCard';
 import { SeasonalPlanner } from '@/components/SeasonalPlanner';
 import { OfflinePlansModal } from '@/components/OfflinePlansModal';
 import { VoiceAssistantBanner } from '@/components/VoiceAssistantBanner';
+import { SoilPhotoScannerModal } from '@/components/SoilPhotoScannerModal';
 import { TRANSLATIONS } from '@/utils/translations';
 import {
   savePlanToStorage,
@@ -42,6 +43,7 @@ import {
   Layers,
   ChevronRight,
   WifiOff,
+  Camera,
 } from 'lucide-react';
 
 export default function Home() {
@@ -54,6 +56,9 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'seed' | 'mandi' | 'soil' | 'weather' | 'seasonal' | 'roi'
   >('overview');
+
+  // Soil Vision Scanner Modal
+  const [isSoilScannerOpen, setIsSoilScannerOpen] = useState<boolean>(false);
 
   // Offline saved plans & fallback state
   const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([]);
@@ -170,6 +175,7 @@ export default function Home() {
         onOpenSavedPlans={() => setIsSavedPlansModalOpen(true)}
         isOnline={isOnline}
         onNetworkChange={setIsOnline}
+        onOpenSoilScanner={() => setIsSoilScannerOpen(true)}
       />
 
       {/* Main Container */}
@@ -206,6 +212,7 @@ export default function Home() {
             language={language}
             onGenerate={handleGenerate}
             isLoading={isLoading}
+            onOpenSoilScanner={() => setIsSoilScannerOpen(true)}
           />
         </section>
 
@@ -296,6 +303,7 @@ export default function Home() {
               {[
                 { id: 'overview', label: t.tabOverview, icon: Sparkles },
                 { id: 'seed', label: t.tabSeed, icon: Sprout },
+                { id: 'soil_scanner', label: 'AI Soil Scanner', icon: Camera, isAction: true },
                 { id: 'mandi', label: t.tabMandi, icon: TrendingUp },
                 { id: 'soil', label: 'Soil Health', icon: FlaskConical },
                 { id: 'weather', label: t.tabWeather, icon: CloudSun },
@@ -307,9 +315,17 @@ export default function Home() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                    onClick={() => {
+                      if (tab.isAction) {
+                        setIsSoilScannerOpen(true);
+                      } else {
+                        setActiveTab(tab.id as typeof activeTab);
+                      }
+                    }}
                     className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
-                      isActive
+                      tab.isAction
+                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white'
+                        : isActive
                         ? 'bg-emerald-600 text-white shadow-md shadow-emerald-700/20'
                         : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
                     }`}
@@ -427,7 +443,10 @@ export default function Home() {
             )}
 
             {activeTab === 'soil' && (
-              <SoilHealthCard soil={result.soil} />
+              <SoilHealthCard
+                soil={result.soil}
+                onOpenSoilScanner={() => setIsSoilScannerOpen(true)}
+              />
             )}
 
             {activeTab === 'weather' && (
@@ -453,6 +472,49 @@ export default function Home() {
         onSelectPlan={handleSelectPlan}
         onDeletePlan={handleDeletePlan}
         language={language}
+      />
+
+      {/* AI Soil Photo Scanner Modal */}
+      <SoilPhotoScannerModal
+        isOpen={isSoilScannerOpen}
+        onClose={() => setIsSoilScannerOpen(false)}
+        language={language}
+        location={
+          result?.input?.location || {
+            region: 'Malwa Agro-Zone',
+            state: 'Punjab',
+            district: 'Ludhiana',
+            latitude: 30.901,
+            longitude: 75.8573,
+          }
+        }
+        liveWeather={result?.weather}
+        waterSource={result?.input?.waterSource || 'canal'}
+        onApplyPrediction={(detectedSoilType, recommendedCrop) => {
+          const baseInput: FarmerInput = result?.input || {
+            location: {
+              region: 'Malwa Agro-Zone',
+              state: 'Punjab',
+              district: 'Ludhiana',
+              latitude: 30.901,
+              longitude: 75.8573,
+            },
+            landSize: 5,
+            landUnit: 'acres',
+            waterSource: 'canal',
+            waterLevel: 'adequate',
+          };
+          const updatedInput: FarmerInput = {
+            ...baseInput,
+            soilType: detectedSoilType,
+            targetCrop: recommendedCrop,
+          };
+          handleGenerate(updatedInput);
+          setToastMessage(
+            `✨ AI Soil Vision Applied: Classified ${detectedSoilType.replace('_', ' ')} & predicted ${recommendedCrop}! Full farm plan recalculated.`
+          );
+          setTimeout(() => setToastMessage(''), 5000);
+        }}
       />
 
       {/* Footer */}
