@@ -118,11 +118,11 @@ export function WeatherWidget({ weather }: WeatherWidgetProps) {
           <Calendar className="w-3.5 h-3.5 text-emerald-600" />
           Day-by-Day Forecast & Spray Windows
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+        <div className="flex overflow-x-auto snap-x snap-mandatory lg:grid lg:grid-cols-7 gap-2.5 pb-2 -mx-2 px-2 no-scrollbar">
           {weather.forecast7Days.map((day, idx) => (
             <div
               key={idx}
-              className="p-3 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700/60 flex flex-col items-center text-center space-y-2 transition-all hover:border-emerald-500"
+              className="min-w-[110px] sm:min-w-[130px] lg:min-w-0 snap-start shrink-0 lg:shrink p-3 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700/60 flex flex-col items-center text-center space-y-2 transition-all hover:border-emerald-500"
             >
               <div className="font-bold text-xs text-stone-800 dark:text-stone-200">{day.day}</div>
               <div className="text-[10px] text-stone-400">{day.date}</div>

@@ -19,6 +19,7 @@ import { SeasonalPlanner } from '@/components/SeasonalPlanner';
 import { OfflinePlansModal } from '@/components/OfflinePlansModal';
 import { VoiceAssistantBanner } from '@/components/VoiceAssistantBanner';
 import { SoilPhotoScannerModal } from '@/components/SoilPhotoScannerModal';
+import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { TRANSLATIONS } from '@/utils/translations';
 import {
   savePlanToStorage,
@@ -179,7 +180,7 @@ export default function Home() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-28 sm:pb-12 space-y-8">
         {/* Hero Section */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-green-900 text-white p-6 sm:p-10 shadow-xl shadow-emerald-950/20">
           <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -515,6 +516,13 @@ export default function Home() {
           );
           setTimeout(() => setToastMessage(''), 5000);
         }}
+      />
+
+      {/* Sticky Mobile Bottom Navigation Bar */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onOpenSoilScanner={() => setIsSoilScannerOpen(true)}
       />
 
       {/* Footer */}

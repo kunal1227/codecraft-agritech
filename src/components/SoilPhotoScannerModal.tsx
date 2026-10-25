@@ -61,6 +61,7 @@ export function SoilPhotoScannerModal({
   const [inputMode, setInputMode] = useState<'camera' | 'upload' | 'samples'>('camera');
   const [cameraActive, setCameraActive] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string>('');
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   // Selected or captured image
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -94,10 +95,11 @@ export function SoilPhotoScannerModal({
     return () => {
       stopCamera();
     };
-  }, [isOpen, inputMode, imagePreviewUrl]);
+  }, [isOpen, inputMode, imagePreviewUrl, facingMode]);
 
   const startCamera = async () => {
     setCameraError('');
+    stopCamera();
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setCameraError('Camera API is not supported on this browser. Please use gallery upload.');
@@ -107,7 +109,7 @@ export function SoilPhotoScannerModal({
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: 'environment' },
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
@@ -126,6 +128,10 @@ export function SoilPhotoScannerModal({
       setCameraActive(false);
       setInputMode('upload');
     }
+  };
+
+  const handleToggleCameraFacing = () => {
+    setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'));
   };
 
   const stopCamera = () => {
@@ -310,25 +316,28 @@ export function SoilPhotoScannerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-stone-900 border border-emerald-500/30 rounded-3xl shadow-2xl text-stone-100 p-5 sm:p-7">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[94dvh] sm:max-h-[90vh] overflow-y-auto bg-stone-900 border border-emerald-500/30 rounded-t-3xl sm:rounded-3xl shadow-2xl text-stone-100 p-4 sm:p-7 pb-8">
+        {/* Mobile Swipe Handle Indicator */}
+        <div className="w-12 h-1.5 rounded-full bg-stone-700 mx-auto mb-3 sm:hidden" />
+
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-stone-800">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-800">
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+            <span className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shrink-0">
               <Camera className="w-5 h-5" />
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl sm:text-2xl font-black text-white">
-                  AgriTech AI Soil Vision & Seed Predictor
+                <h2 className="text-lg sm:text-2xl font-black text-white">
+                  AgriTech AI Soil Vision
                 </h2>
-                <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                  Trained Vision Model
+                <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  Vision Model
                 </span>
               </div>
-              <p className="text-xs text-stone-400 mt-0.5">
-                Snap or upload soil photo • Computer Vision classifies soil matrix • AI predicts high-yielding seeds with live weather
+              <p className="text-xs text-stone-400 mt-0.5 line-clamp-1 sm:line-clamp-none">
+                Snap or upload soil photo • Computer Vision classifies soil matrix • AI predicts high-yielding seeds
               </p>
             </div>
           </div>
@@ -337,49 +346,49 @@ export function SoilPhotoScannerModal({
               stopCamera();
               onClose();
             }}
-            className="p-2 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 transition-colors"
+            className="p-2.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 transition-colors cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Main Content Area */}
-        <div className="mt-5 space-y-6">
+        <div className="mt-4 sm:mt-5 space-y-5">
           {/* Step 1: Input Source Selector Tabs (Visible when no photo captured yet) */}
           {!imagePreviewUrl && (
             <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-stone-950 border border-stone-800">
               <button
                 onClick={() => setInputMode('camera')}
-                className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[100px] sm:min-w-[130px] flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all cursor-pointer min-h-[44px] ${
                   inputMode === 'camera'
                     ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/40'
                     : 'text-stone-400 hover:text-stone-200'
                 }`}
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-4 h-4 shrink-0" />
                 Live Camera
               </button>
               <button
                 onClick={() => setInputMode('upload')}
-                className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[100px] sm:min-w-[130px] flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all cursor-pointer min-h-[44px] ${
                   inputMode === 'upload'
                     ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/40'
                     : 'text-stone-400 hover:text-stone-200'
                 }`}
               >
-                <Upload className="w-4 h-4" />
-                Upload from Gallery
+                <Upload className="w-4 h-4 shrink-0" />
+                Gallery
               </button>
               <button
                 onClick={() => setInputMode('samples')}
-                className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[100px] sm:min-w-[130px] flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all cursor-pointer min-h-[44px] ${
                   inputMode === 'samples'
                     ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/40'
                     : 'text-stone-400 hover:text-stone-200'
                 }`}
               >
-                <Sparkles className="w-4 h-4" />
-                Instant Sample Soils
+                <Sparkles className="w-4 h-4 shrink-0" />
+                Sample Soils
               </button>
             </div>
           )}
@@ -389,13 +398,13 @@ export function SoilPhotoScannerModal({
             <div className="relative">
               {/* Camera Mode */}
               {inputMode === 'camera' && (
-                <div className="relative w-full aspect-video sm:aspect-[16/9] max-h-[380px] bg-black rounded-3xl overflow-hidden border border-stone-800 flex flex-col items-center justify-center">
+                <div className="relative w-full aspect-square sm:aspect-video max-h-[380px] bg-black rounded-3xl overflow-hidden border border-stone-800 flex flex-col items-center justify-center">
                   {cameraError ? (
                     <div className="text-center p-6 max-w-md">
-                      <p className="text-amber-400 text-sm mb-3">{cameraError}</p>
+                      <p className="text-amber-400 text-xs sm:text-sm mb-3">{cameraError}</p>
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold"
+                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold min-h-[44px]"
                       >
                         Choose Photo from Device
                       </button>
@@ -410,23 +419,38 @@ export function SoilPhotoScannerModal({
                       />
 
                       {/* Agricultural Target Reticle Overlay */}
-                      <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-                        <div className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-dashed border-emerald-400/80 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/10">
+                      <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-4">
+                        <div className="w-44 h-44 sm:w-56 sm:h-56 border-2 border-dashed border-emerald-400/80 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/10">
                           <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
                         </div>
-                        <span className="mt-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-sm text-[11px] font-bold text-emerald-300 border border-emerald-500/30">
+                        <span className="mt-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-sm text-[10px] sm:text-[11px] font-bold text-emerald-300 border border-emerald-500/30 text-center">
                           Align clear soil sample in box (remove leaves/dry grass)
                         </span>
                       </div>
 
-                      {/* Shutter Button */}
-                      <div className="absolute bottom-4 inset-x-0 flex items-center justify-center">
+                      {/* Camera Controls Row */}
+                      <div className="absolute bottom-4 inset-x-0 flex items-center justify-center gap-6 px-4">
+                        {/* Switch Camera Button */}
+                        <button
+                          type="button"
+                          onClick={handleToggleCameraFacing}
+                          className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white flex items-center justify-center active:scale-90 transition-transform cursor-pointer shadow-lg"
+                          title="Flip Camera (Front/Back)"
+                        >
+                          <RefreshCw className="w-5 h-5" />
+                        </button>
+
+                        {/* Shutter Button */}
                         <button
                           onClick={handleCaptureSnapshot}
-                          className="w-16 h-16 rounded-full bg-white hover:bg-stone-200 text-stone-900 flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-emerald-500"
+                          className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-white hover:bg-stone-200 text-stone-900 flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-emerald-500 cursor-pointer"
+                          title="Capture Soil Photo"
                         >
-                          <Camera className="w-7 h-7 text-emerald-950" />
+                          <Camera className="w-8 h-8 text-emerald-950" />
                         </button>
+
+                        {/* Spacer for symmetrical centering */}
+                        <div className="w-12 h-12 invisible" />
                       </div>
                     </>
                   )}
@@ -442,16 +466,17 @@ export function SoilPhotoScannerModal({
                   <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 group-hover:bg-emerald-500/20 text-emerald-400 flex items-center justify-center transition-colors">
                     <Upload className="w-8 h-8" />
                   </div>
-                  <h4 className="text-base font-bold text-white mt-4">
-                    Click to browse or drop field soil photo here
+                  <h4 className="text-sm sm:text-base font-bold text-white mt-4 text-center">
+                    Tap to snap photo or choose from gallery
                   </h4>
                   <p className="text-xs text-stone-400 mt-1 max-w-sm text-center">
-                    Supports JPG, PNG, WEBP. Natural sunlight photos provide highest spectral accuracy.
+                    Natural sunlight photos provide highest spectral accuracy.
                   </p>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
+                    capture="environment"
                     onChange={handleFileUpload}
                     className="hidden"
                   />

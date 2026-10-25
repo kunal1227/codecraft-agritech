@@ -165,7 +165,39 @@ export function MandiMarketCard({ market }: MandiMarketCardProps) {
             Nearby APMC Yard Rates & Arrival Volumes
           </span>
         </div>
-        <div className="overflow-x-auto">
+        {/* Mobile View: Clean Card Stack */}
+        <div className="sm:hidden space-y-2.5">
+          {market.topMandis.map((mandi, idx) => (
+            <div
+              key={idx}
+              className="p-3 rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-700/60 flex items-center justify-between"
+            >
+              <div>
+                <div className="font-extrabold text-xs text-stone-900 dark:text-stone-100">
+                  {mandi.mandiName}
+                </div>
+                <div className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">
+                  {mandi.district} • {mandi.distanceKm} km away
+                </div>
+                <div className="text-[10px] text-stone-400 mt-1 font-mono">
+                  Range: ₹{mandi.minPrice} - ₹{mandi.maxPrice}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-black text-emerald-700 dark:text-emerald-400">
+                  ₹{mandi.modalPrice}
+                </div>
+                <span className="text-[10px] font-semibold text-stone-400">/ Quintal</span>
+                <div className="text-[10px] font-mono text-stone-400 mt-0.5">
+                  {mandi.arrivalVolumeTonnes} MT
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View: Full Table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-400 font-bold uppercase text-[10px]">

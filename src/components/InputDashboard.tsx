@@ -426,21 +426,39 @@ export function InputDashboard({
               <Layers className="w-3.5 h-3.5 text-emerald-600" />
               {t.landSizeLabel}
             </label>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="0.25"
-                max="250"
-                step="0.25"
-                value={landSize}
-                onChange={(e) => setLandSize(parseFloat(e.target.value) || 1)}
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-100 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none"
-              />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1 relative flex items-center">
+                <button
+                  type="button"
+                  onClick={() => setLandSize((prev) => Math.max(0.5, Number((prev - 0.5).toFixed(1))))}
+                  className="w-11 h-11 rounded-l-xl bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 font-black text-xl flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-transform"
+                  title="Decrease Land Size"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min="0.25"
+                  max="250"
+                  step="0.25"
+                  value={landSize}
+                  onChange={(e) => setLandSize(parseFloat(e.target.value) || 1)}
+                  required
+                  className="w-full text-center px-2 py-2.5 h-11 bg-stone-50 dark:bg-stone-800/80 border-y border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-100 text-base sm:text-sm font-black focus:ring-2 focus:ring-emerald-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setLandSize((prev) => Number((prev + 0.5).toFixed(1)))}
+                  className="w-11 h-11 rounded-r-xl bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 font-black text-xl flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-transform"
+                  title="Increase Land Size"
+                >
+                  +
+                </button>
+              </div>
               <select
                 value={landUnit}
                 onChange={(e) => setLandUnit(e.target.value as LandUnit)}
-                className="px-3 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-200 text-xs font-bold uppercase outline-none"
+                className="h-11 px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-200 text-xs font-bold uppercase outline-none"
               >
                 <option value="acres">Acres</option>
                 <option value="hectares">Hectares</option>
