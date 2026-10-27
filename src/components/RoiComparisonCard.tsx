@@ -42,7 +42,7 @@ export function RoiComparisonCard({ result }: RoiComparisonCardProps) {
         </div>
 
         {/* Expected Net Profit Banner */}
-        <div className="bg-gradient-to-br from-emerald-600 to-green-700 text-white p-3 sm:px-5 sm:py-3 rounded-2xl shadow-md shadow-emerald-700/20 self-start sm:self-auto">
+        <div className="w-full sm:w-auto bg-gradient-to-br from-emerald-600 to-green-700 text-white p-3.5 sm:px-5 sm:py-3 rounded-2xl shadow-md shadow-emerald-700/20">
           <div className="text-[10px] uppercase font-bold text-emerald-100">Estimated Total Net Profit</div>
           <div className="text-2xl sm:text-3xl font-black tracking-tight">
             ₹{expectedYield.estimatedNetProfit.toLocaleString('en-IN')}

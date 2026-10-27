@@ -62,7 +62,7 @@ export function WeatherWidget({ weather }: WeatherWidgetProps) {
         </div>
 
         {/* Current Temp & Wind Snapshot */}
-        <div className="flex items-center gap-4 bg-stone-50 dark:bg-stone-800/60 px-4 py-2.5 rounded-2xl border border-stone-200 dark:border-stone-700 self-start sm:self-auto">
+        <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 bg-stone-50 dark:bg-stone-800/60 px-4 py-2.5 rounded-2xl border border-stone-200 dark:border-stone-700">
           <div>
             <div className="text-[10px] uppercase font-bold text-stone-400">Current Field Temp</div>
             <div className="text-2xl font-black text-stone-900 dark:text-stone-100">

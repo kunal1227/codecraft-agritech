@@ -199,9 +199,9 @@ export default function Home() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-28 sm:pb-12 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 sm:pb-12 space-y-6 sm:space-y-8">
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-green-900 text-white p-6 sm:p-10 shadow-xl shadow-emerald-950/20">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-green-900 text-white p-5 sm:p-8 lg:p-10 shadow-xl shadow-emerald-950/20">
           <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-white/10 text-emerald-200 border border-white/20 backdrop-blur-xs">
@@ -256,7 +256,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setIsSoilScannerOpen(true)}
-                className="ml-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-400 hover:bg-emerald-300 text-stone-950 transition-all shadow-md shadow-emerald-950/40 cursor-pointer"
+                className="w-full sm:w-auto mt-2 sm:mt-0 sm:ml-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-400 hover:bg-emerald-300 text-stone-950 transition-all shadow-md shadow-emerald-950/40 cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5" />
                 {language === 'mr' ? '📸 AI माती स्कॅन करा' : '📸 AI Scan Soil'}
@@ -343,10 +343,10 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
+              <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2">
                 <button
                   onClick={handleSavePlan}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-emerald-700/20 active:scale-95 cursor-pointer"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-emerald-700/20 active:scale-95 cursor-pointer min-h-[44px]"
                 >
                   <BookmarkPlus className="w-4 h-4" />
                   <span>{t.saveOffline}</span>
@@ -354,7 +354,7 @@ export default function Home() {
 
                 <button
                   onClick={() => window.print()}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs sm:text-sm font-bold transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[44px]"
                   title="Print or export PDF field advisory card"
                 >
                   <Printer className="w-4 h-4" />
@@ -367,7 +367,7 @@ export default function Home() {
             <VoiceAssistantBanner result={result} language={language} />
 
             {/* Interactive Tab Navigation */}
-            <div className="flex overflow-x-auto no-scrollbar gap-2 p-1.5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
+            <div className="flex overflow-x-auto no-scrollbar gap-2 p-1.5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs snap-x snap-mandatory touch-pan-x">
               {[
                 { id: 'overview', label: t.tabOverview, icon: Sparkles },
                 { id: 'seed', label: t.tabSeed, icon: Sprout },
@@ -390,7 +390,7 @@ export default function Home() {
                         setActiveTab(tab.id as typeof activeTab);
                       }
                     }}
-                    className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`shrink-0 snap-start flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer min-h-[44px] ${
                       tab.isAction
                         ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white'
                         : isActive

@@ -66,7 +66,7 @@ export function SeasonalPlanner({ plans, acres }: SeasonalPlannerProps) {
         </div>
 
         {/* Total Annual Rotation Profit */}
-        <div className="bg-stone-50 dark:bg-stone-800/70 p-3 sm:px-4 sm:py-2.5 rounded-2xl border border-stone-200 dark:border-stone-700 text-right self-start sm:self-auto">
+        <div className="w-full sm:w-auto text-left sm:text-right flex flex-col justify-center bg-stone-50 dark:bg-stone-800/70 p-3 sm:px-4 sm:py-2.5 rounded-2xl border border-stone-200 dark:border-stone-700">
           <div className="text-[10px] uppercase font-bold text-stone-400">Projected 3-Season Farm Income</div>
           <div className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400">
             ₹{totalAnnualProfit.toLocaleString('en-IN')}

@@ -51,7 +51,7 @@ export function SoilHealthCard({ soil, onOpenSoilScanner }: SoilHealthCardProps)
         </div>
 
         {/* Actions: Scan Photo & Soil Health Score Badge */}
-        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+        <div className="w-full sm:w-auto flex flex-wrap items-center justify-between sm:justify-end gap-2.5">
           {onOpenSoilScanner && (
             <button
               type="button"

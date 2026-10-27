@@ -46,8 +46,8 @@ export function SeedVarietyCard({ seed, cropName }: SeedVarietyCardProps) {
         </div>
 
         {/* Germination Gauge */}
-        <div className="flex items-center gap-3 bg-stone-50 dark:bg-stone-800/70 px-4 py-2.5 rounded-2xl border border-stone-200 dark:border-stone-700 self-start sm:self-auto">
-          <div className="text-right">
+        <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-3 bg-stone-50 dark:bg-stone-800/70 px-4 py-2.5 rounded-2xl border border-stone-200 dark:border-stone-700">
+          <div className="text-left sm:text-right">
             <div className="text-[10px] uppercase font-bold text-stone-400">Certified Germination</div>
             <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">
               {seed.germinationRatePct}%

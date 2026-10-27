@@ -75,10 +75,10 @@ export function VoiceAssistantBanner({ result, language }: VoiceAssistantBannerP
         </div>
       </div>
 
-      <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+      <div className="w-full sm:w-auto flex items-center justify-center shrink-0">
         <button
           onClick={handleToggleSpeak}
-          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all shadow-md cursor-pointer ${
+          className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all shadow-md cursor-pointer min-h-[44px] ${
             isPlaying
               ? 'bg-rose-600 hover:bg-rose-700 text-white ring-4 ring-rose-400/40'
               : 'bg-white hover:bg-emerald-50 text-emerald-900 shadow-white/10 active:scale-95'

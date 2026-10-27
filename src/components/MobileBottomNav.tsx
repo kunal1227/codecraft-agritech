@@ -31,14 +31,14 @@ export function MobileBottomNav({
       aria-label="Mobile Navigation"
       className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-stone-950/95 backdrop-blur-xl border-t border-stone-800 shadow-2xl pb-[env(safe-area-inset-bottom,0.5rem)] pt-1 transition-all"
     >
-      <div className="w-full max-w-lg mx-auto grid grid-cols-5 items-end px-1">
+      <div className="w-full max-w-lg mx-auto grid grid-cols-5 items-end px-1 h-14">
         {/* 1. Overview */}
         <button
           onClick={() => {
             onTabChange('overview');
             window.scrollTo({ top: 380, behavior: 'smooth' });
           }}
-          className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer w-full min-h-[48px] ${
+          className={`flex flex-col items-center justify-end h-full pb-1 px-1 rounded-xl transition-all cursor-pointer w-full touch-manipulation ${
             activeTab === 'overview'
               ? 'text-emerald-400 font-extrabold'
               : 'text-stone-400 hover:text-stone-200 font-medium'
@@ -51,7 +51,7 @@ export function MobileBottomNav({
           >
             <Sprout className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center">
+          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center leading-tight">
             {labels.overview}
           </span>
         </button>
@@ -62,7 +62,7 @@ export function MobileBottomNav({
             onTabChange('mandi');
             window.scrollTo({ top: 420, behavior: 'smooth' });
           }}
-          className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer w-full min-h-[48px] ${
+          className={`flex flex-col items-center justify-end h-full pb-1 px-1 rounded-xl transition-all cursor-pointer w-full touch-manipulation ${
             activeTab === 'mandi'
               ? 'text-emerald-400 font-extrabold'
               : 'text-stone-400 hover:text-stone-200 font-medium'
@@ -75,21 +75,22 @@ export function MobileBottomNav({
           >
             <TrendingUp className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center">
+          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center leading-tight">
             {labels.mandi}
           </span>
         </button>
 
-        {/* 3. Center Action: AI Soil Camera Scanner (Mathematically centered in 3rd col) */}
-        <div className="flex flex-col items-center justify-end w-full pb-1">
+        {/* 3. Center Action: AI Soil Camera Scanner (Centered with elevated button) */}
+        <div className="flex flex-col items-center justify-end h-full pb-1 w-full">
           <button
             onClick={onOpenSoilScanner}
-            className="-mt-6 w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-green-400 text-stone-950 flex items-center justify-center shadow-xl shadow-emerald-500/40 ring-4 ring-stone-950 hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            className="-mt-5 sm:-mt-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-green-400 text-stone-950 flex items-center justify-center shadow-xl shadow-emerald-500/40 ring-4 ring-stone-950 hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 touch-manipulation"
             title="Scan Soil Photo with AI"
+            aria-label="Scan Soil Photo with AI"
           >
-            <Camera className="w-6 h-6 stroke-[2.5]" />
+            <Camera className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
           </button>
-          <span className="text-[10px] font-black text-emerald-400 tracking-tight mt-1 truncate max-w-full text-center">
+          <span className="text-[10px] font-black text-emerald-400 tracking-tight mt-0.5 truncate max-w-full text-center leading-tight">
             {labels.scanSoil}
           </span>
         </div>
@@ -100,7 +101,7 @@ export function MobileBottomNav({
             onTabChange('weather');
             window.scrollTo({ top: 420, behavior: 'smooth' });
           }}
-          className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer w-full min-h-[48px] ${
+          className={`flex flex-col items-center justify-end h-full pb-1 px-1 rounded-xl transition-all cursor-pointer w-full touch-manipulation ${
             activeTab === 'weather'
               ? 'text-emerald-400 font-extrabold'
               : 'text-stone-400 hover:text-stone-200 font-medium'
@@ -113,7 +114,7 @@ export function MobileBottomNav({
           >
             <CloudSun className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center">
+          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center leading-tight">
             {labels.weather}
           </span>
         </button>
@@ -124,7 +125,7 @@ export function MobileBottomNav({
             onTabChange('soil');
             window.scrollTo({ top: 420, behavior: 'smooth' });
           }}
-          className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer w-full min-h-[48px] ${
+          className={`flex flex-col items-center justify-end h-full pb-1 px-1 rounded-xl transition-all cursor-pointer w-full touch-manipulation ${
             activeTab === 'soil'
               ? 'text-emerald-400 font-extrabold'
               : 'text-stone-400 hover:text-stone-200 font-medium'
@@ -137,7 +138,7 @@ export function MobileBottomNav({
           >
             <FlaskConical className="w-5 h-5" />
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center">
+          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-full text-center leading-tight">
             {labels.soil}
           </span>
         </button>

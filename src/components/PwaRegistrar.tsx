@@ -83,7 +83,7 @@ export function PwaRegistrar({
     <div className="flex items-center gap-2 text-xs font-medium">
       {/* Network Connectivity Status Badge */}
       <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${
+        className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full border transition-all ${
           isOnline
             ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
             : 'bg-amber-500/15 text-amber-800 dark:text-amber-200 border-amber-500/40 animate-pulse'
@@ -92,13 +92,13 @@ export function PwaRegistrar({
       >
         {isOnline ? (
           <>
-            <Wifi className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Online</span>
+            <Wifi className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span className="hidden sm:inline">Online</span>
           </>
         ) : (
           <>
-            <WifiOff className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            <span>Offline (Cached)</span>
+            <WifiOff className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span className="hidden sm:inline">Offline</span>
           </>
         )}
       </span>
