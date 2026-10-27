@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FarmerInput,
   LandUnit,
@@ -25,8 +25,14 @@ import {
   Layers,
   ArrowRight,
   Camera,
+  X,
 } from 'lucide-react';
 import { parseFarmVoiceInput, SPEECH_LANG_CODES } from '@/utils/speech';
+import {
+  detectRealTimeLocation,
+  searchRealTimeLocations,
+  LocationSearchResult,
+} from '@/services/locationService';
 
 interface InputDashboardProps {
   initialInput?: Partial<FarmerInput>;
@@ -37,30 +43,33 @@ interface InputDashboardProps {
 }
 
 const REGIONS: LocationData[] = [
+  { state: 'Maharashtra', district: 'Nashik', region: 'Western Deccan Plateau & Ghats', latitude: 19.9975, longitude: 73.7898 },
+  { state: 'Maharashtra', district: 'Latur', region: 'Marathwada Black Soil Oilseed Zone', latitude: 18.4088, longitude: 76.5604 },
+  { state: 'Maharashtra', district: 'Pune', region: 'Western Maharashtra Sugarcane Belt', latitude: 18.5204, longitude: 73.8567 },
+  { state: 'Maharashtra', district: 'Nagpur', region: 'Vidarbha Cotton & Orange Belt', latitude: 21.1458, longitude: 79.0882 },
   { state: 'Punjab', district: 'Ludhiana', region: 'Malwa Agro-Zone', latitude: 30.901, longitude: 75.8573 },
   { state: 'Haryana', district: 'Karnal', region: 'Indo-Gangetic Plain', latitude: 29.6857, longitude: 76.9905 },
-  { state: 'Maharashtra', district: 'Nashik', region: 'Western Deccan Plateau', latitude: 19.9975, longitude: 73.7898 },
   { state: 'Madhya Pradesh', district: 'Indore', region: 'Malwa Black Soil Belt', latitude: 22.7196, longitude: 75.8577 },
+  { state: 'Gujarat', district: 'Rajkot', region: 'Saurashtra Arid Coastal', latitude: 22.3039, longitude: 70.8022 },
   { state: 'Andhra Pradesh', district: 'Guntur', region: 'Krishna-Godavari Coastal', latitude: 16.3067, longitude: 80.4365 },
   { state: 'Telangana', district: 'Warangal', region: 'North Telangana Plateau', latitude: 17.9689, longitude: 79.5941 },
-  { state: 'Uttar Pradesh', district: 'Varanasi', region: 'Eastern Gangetic Alluvial', latitude: 25.3176, longitude: 82.9739 },
-  { state: 'Rajasthan', district: 'Kota', region: 'Hadoti Semi-Arid Basin', latitude: 25.2138, longitude: 75.8648 },
-  { state: 'Gujarat', district: 'Rajkot', region: 'Saurashtra Arid Coastal', latitude: 22.3039, longitude: 70.8022 },
   { state: 'Karnataka', district: 'Mandya', region: 'Cauvery Basin Irrigated', latitude: 12.5239, longitude: 76.8973 },
+  { state: 'Rajasthan', district: 'Kota', region: 'Hadoti Semi-Arid Basin', latitude: 25.2138, longitude: 75.8648 },
+  { state: 'Uttar Pradesh', district: 'Varanasi', region: 'Eastern Gangetic Alluvial', latitude: 25.3176, longitude: 82.9739 },
 ];
 
 const CROPS = [
-  'Wheat',
-  'Paddy (Rice)',
-  'Basmati Rice',
   'Cotton',
   'Soybean',
+  'Onion',
+  'Wheat',
+  'Paddy (Rice)',
+  'Gram (Chickpea / Chana)',
   'Mustard',
   'Maize',
-  'Gram (Chickpea / Chana)',
   'Tomato',
-  'Onion',
   'Chili (Dry)',
+  'Basmati Rice',
 ];
 
 export function InputDashboard({
@@ -72,61 +81,126 @@ export function InputDashboard({
 }: InputDashboardProps) {
   const t = TRANSLATIONS[language];
 
+  // Default to Nashik, Maharashtra
+  const defaultInitialLocation = REGIONS[0];
+
   // Form State
   const [selectedRegionIdx, setSelectedRegionIdx] = useState<number>(0);
-  const [customLocation, setCustomLocation] = useState<LocationData>(REGIONS[0]);
+  const [customLocation, setCustomLocation] = useState<LocationData>(
+    initialInput?.location || defaultInitialLocation
+  );
   const [isDetectingGps, setIsDetectingGps] = useState<boolean>(false);
-  const [gpsLocked, setGpsLocked] = useState<boolean>(false);
+  const [gpsLocked, setGpsLocked] = useState<boolean>(initialInput?.location?.isGpsDetected || false);
 
-  const [landSize, setLandSize] = useState<number>(initialInput?.landSize || 5);
+  // Real-time location search state
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState<boolean>(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState<boolean>(false);
+
+  const [landSize, setLandSize] = useState<number>(initialInput?.landSize || 4);
   const [landUnit, setLandUnit] = useState<LandUnit>(initialInput?.landUnit || 'acres');
-  const [waterSource, setWaterSource] = useState<WaterSource>(initialInput?.waterSource || 'canal');
+  const [waterSource, setWaterSource] = useState<WaterSource>(initialInput?.waterSource || 'drip_sprinkler');
   const [waterLevel, setWaterLevel] = useState<WaterLevel>(initialInput?.waterLevel || 'adequate');
-  const [targetCrop, setTargetCrop] = useState<string>(initialInput?.targetCrop || 'Wheat');
+  const [targetCrop, setTargetCrop] = useState<string>(initialInput?.targetCrop || 'Cotton');
 
   // Voice Input State
   const [isListening, setIsListening] = useState<boolean>(false);
   const [voiceFeedback, setVoiceFeedback] = useState<string>('');
 
-  // Handle GPS Auto-Detection
-  const handleDetectGps = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
-      return;
-    }
-    setIsDetectingGps(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setCustomLocation({
-          region: 'GPS Field Location',
-          state: 'Punjab', // Default nearest agricultural hub simulation
-          district: 'Live Coords',
-          latitude: Number(latitude.toFixed(4)),
-          longitude: Number(longitude.toFixed(4)),
-          isGpsDetected: true,
-        });
-        setIsDetectingGps(false);
-        setGpsLocked(true);
-      },
-      (err) => {
-        console.warn('GPS detection failed or timed out:', err);
-        // Fallback simulation
-        setTimeout(() => {
-          setCustomLocation({
-            region: 'GPS Field Location (Simulated)',
-            state: 'Punjab',
-            district: 'Ludhiana Ag-Belt',
-            latitude: 30.901,
-            longitude: 75.857,
-            isGpsDetected: true,
-          });
-          setIsDetectingGps(false);
+  // Sync with initialInput if provided
+  useEffect(() => {
+    if (initialInput) {
+      if (initialInput.location) {
+        setCustomLocation(initialInput.location);
+        if (initialInput.location.isGpsDetected) {
           setGpsLocked(true);
-        }, 600);
-      },
-      { timeout: 7000 }
+        }
+        const matchedIdx = REGIONS.findIndex(
+          (r) => r.state.toLowerCase() === initialInput.location?.state.toLowerCase()
+        );
+        if (matchedIdx !== -1) {
+          setSelectedRegionIdx(matchedIdx);
+        }
+      }
+      if (initialInput.landSize) setLandSize(initialInput.landSize);
+      if (initialInput.landUnit) setLandUnit(initialInput.landUnit);
+      if (initialInput.waterSource) setWaterSource(initialInput.waterSource);
+      if (initialInput.waterLevel) setWaterLevel(initialInput.waterLevel);
+      if (initialInput.targetCrop) setTargetCrop(initialInput.targetCrop);
+    }
+  }, [initialInput]);
+
+  // Handle Real-Time GPS & Live Location Detection
+  const handleDetectGps = async () => {
+    setIsDetectingGps(true);
+    setVoiceFeedback(
+      language === 'mr'
+        ? '🛰️ थेट GPS व वास्तव लोकेशन मिळवत आहे...'
+        : '🛰️ Detecting live GPS satellite coordinates & district...'
     );
+
+    try {
+      const realLocation = await detectRealTimeLocation();
+      setCustomLocation(realLocation);
+      setGpsLocked(true);
+
+      const matchedIdx = REGIONS.findIndex(
+        (r) => r.state.toLowerCase() === realLocation.state.toLowerCase()
+      );
+      if (matchedIdx !== -1) {
+        setSelectedRegionIdx(matchedIdx);
+      }
+
+      setVoiceFeedback(
+        language === 'mr'
+          ? `📍 वास्तव लोकेशन निश्चित: ${realLocation.district}, ${realLocation.state} (${realLocation.latitude}°N, ${realLocation.longitude}°E)`
+          : `📍 Real-Time Location Locked: ${realLocation.district}, ${realLocation.state} (${realLocation.latitude}°N, ${realLocation.longitude}°E)`
+      );
+    } catch (err) {
+      console.warn('Real-time location detection error:', err);
+    } finally {
+      setIsDetectingGps(false);
+    }
+  };
+
+  // Handle Real-Time Location Search
+  const handleLocationSearch = async (val: string) => {
+    setSearchQuery(val);
+    if (val.trim().length >= 2) {
+      setIsSearchingLocation(true);
+      setShowSearchDropdown(true);
+      const results = await searchRealTimeLocations(val);
+      setSearchResults(results);
+      setIsSearchingLocation(false);
+    } else {
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+    }
+  };
+
+  const handleSelectSearchResult = (item: LocationSearchResult) => {
+    const loc: LocationData = {
+      state: item.state,
+      district: item.district,
+      city: item.name,
+      region: item.region,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      isGpsDetected: true,
+      formattedAddress: item.label,
+    };
+    setCustomLocation(loc);
+    setGpsLocked(true);
+    setSearchQuery(`${item.name}, ${item.state}`);
+    setShowSearchDropdown(false);
+
+    const matchedIdx = REGIONS.findIndex(
+      (r) => r.state.toLowerCase() === item.state.toLowerCase()
+    );
+    if (matchedIdx !== -1) {
+      setSelectedRegionIdx(matchedIdx);
+    }
   };
 
   // Handle Region Dropdown Change
@@ -134,6 +208,7 @@ export function InputDashboard({
     setSelectedRegionIdx(idx);
     setCustomLocation(REGIONS[idx]);
     setGpsLocked(false);
+    setSearchQuery('');
   };
 
   // Voice Input (Speech Recognition)
@@ -386,36 +461,112 @@ export function InputDashboard({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Location & GPS */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-stone-700 dark:text-stone-300 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                 {t.locationLabel}
-              </span>
+              </label>
               <button
                 type="button"
                 onClick={handleDetectGps}
                 disabled={isDetectingGps}
-                className="text-[11px] text-emerald-700 dark:text-emerald-400 hover:underline inline-flex items-center gap-1 cursor-pointer font-semibold"
+                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold inline-flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
+                title="Detect live GPS coordinates and local district in real time"
               >
-                <Compass className={`w-3 h-3 ${isDetectingGps ? 'animate-spin' : ''}`} />
-                {isDetectingGps ? t.gpsDetecting : gpsLocked ? t.gpsSuccess : t.gpsDetect}
+                <Compass className={`w-3.5 h-3.5 ${isDetectingGps ? 'animate-spin' : ''}`} />
+                <span>{isDetectingGps ? t.gpsDetecting : gpsLocked ? '✓ ' + t.gpsSuccess : t.gpsDetect}</span>
               </button>
-            </label>
+            </div>
+
+            {/* Real-time search or quick select */}
+            <div className="relative">
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-300 dark:border-stone-700 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-transparent">
+                <Search className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleLocationSearch(e.target.value)}
+                  onFocus={() => {
+                    if (searchResults.length > 0) setShowSearchDropdown(true);
+                  }}
+                  placeholder={
+                    language === 'mr'
+                      ? 'थेट शोधा (उदा. नाशिक, पुणे, लातूर, बारामती...)'
+                      : 'Live search (e.g. Nashik, Pune, Latur, Karnal...)'
+                  }
+                  className="w-full bg-transparent text-xs sm:text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResults([]);
+                      setShowSearchDropdown(false);
+                    }}
+                    className="p-1 hover:text-stone-200 text-stone-400"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {isSearchingLocation && (
+                  <Compass className="w-3.5 h-3.5 text-emerald-500 animate-spin shrink-0" />
+                )}
+              </div>
+
+              {/* Autocomplete dropdown results */}
+              {showSearchDropdown && searchResults.length > 0 && (
+                <div className="absolute z-30 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-stone-900 border border-emerald-500/40 rounded-2xl shadow-2xl p-1.5 space-y-1">
+                  {searchResults.map((item) => (
+                    <button
+                      key={`${item.id}-${item.latitude}`}
+                      type="button"
+                      onClick={() => handleSelectSearchResult(item)}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors flex items-center justify-between group cursor-pointer"
+                    >
+                      <div>
+                        <div className="font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                          {item.name}
+                        </div>
+                        <div className="text-[10px] text-stone-400">
+                          {item.state} • {item.region}
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono text-stone-400">
+                        {item.latitude.toFixed(2)}°, {item.longitude.toFixed(2)}°
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Quick state / zone preset selector */}
             <select
               value={selectedRegionIdx}
               onChange={(e) => handleRegionChange(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-100 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
             >
               {REGIONS.map((r, idx) => (
-                <option key={r.state} value={idx}>
+                <option key={`${r.state}-${r.district}`} value={idx}>
                   {r.state} — {r.district} ({r.region})
                 </option>
               ))}
             </select>
-            <div className="text-[11px] text-stone-400 flex items-center gap-1.5 pl-1">
-              <span>Coordinates:</span>
-              <span className="font-mono text-emerald-700 dark:text-emerald-400">
-                {customLocation.latitude}°N, {customLocation.longitude}°E
+
+            {/* Live Location Active Pill */}
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-[11px]">
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="font-bold text-emerald-900 dark:text-emerald-300 truncate">
+                  {customLocation.district}, {customLocation.state}
+                </span>
+                <span className="text-stone-400 text-[10px] hidden sm:inline truncate">
+                  ({customLocation.region})
+                </span>
+              </div>
+              <span className="font-mono text-emerald-700 dark:text-emerald-400 text-[10px] shrink-0">
+                {customLocation.latitude.toFixed(2)}°N, {customLocation.longitude.toFixed(2)}°E
               </span>
             </div>
           </div>

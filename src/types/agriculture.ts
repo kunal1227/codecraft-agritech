@@ -14,9 +14,12 @@ export interface LocationData {
   region: string;
   state: string;
   district: string;
+  city?: string;
   latitude: number;
   longitude: number;
   isGpsDetected?: boolean;
+  source?: string;
+  formattedAddress?: string;
 }
 
 export interface FarmerInput {

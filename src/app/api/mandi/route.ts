@@ -150,7 +150,12 @@ function getFallbackRecords(crop: string, stateFilter?: string) {
     year: 'numeric',
   });
 
-  return profile.mandis.map((m) => ({
+  const stateLower = (stateFilter || '').toLowerCase();
+  const matched = profile.mandis.filter((m) => stateLower && m.state.toLowerCase().includes(stateLower));
+  const others = profile.mandis.filter((m) => !stateLower || !m.state.toLowerCase().includes(stateLower));
+  const prioritizedMandis = matched.length > 0 ? [...matched, ...others] : profile.mandis;
+
+  return prioritizedMandis.map((m) => ({
     state: m.state,
     district: m.district,
     market: m.market,

@@ -21,6 +21,7 @@ import { VoiceAssistantBanner } from '@/components/VoiceAssistantBanner';
 import { SoilPhotoScannerModal } from '@/components/SoilPhotoScannerModal';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { TRANSLATIONS } from '@/utils/translations';
+import { detectRealTimeLocation } from '@/services/locationService';
 import {
   savePlanToStorage,
   getSavedPlans,
@@ -90,26 +91,44 @@ export default function Home() {
       setResult(cachedRecord.result);
       setOfflineCachedTime(cachedRecord.savedAt);
     } else {
-      // Generate initial Punjab Wheat default recommendation if online and no cache
-      const defaultInput: FarmerInput = {
-        location: {
-          region: 'Malwa Agro-Zone',
-          state: 'Punjab',
-          district: 'Ludhiana',
-          latitude: 30.901,
-          longitude: 75.8573,
-        },
-        landSize: 5,
-        landUnit: 'acres',
-        waterSource: 'canal',
-        waterLevel: 'adequate',
-        targetCrop: 'Wheat',
-      };
-      generatePrecisionRecommendation(defaultInput).then((res) => {
-        setResult(res);
-        // Automatically cache to browser localStorage & IndexedDB
-        cacheLatestGeneratedPlan(res);
-      });
+      // Auto-detect real-time location via live IP / GPS immediately on launch
+      detectRealTimeLocation()
+        .then((liveLoc) => {
+          const isMh = (liveLoc.state || '').toLowerCase().includes('maharashtra');
+          const defaultInput: FarmerInput = {
+            location: liveLoc,
+            landSize: isMh ? 4 : 5,
+            landUnit: 'acres',
+            waterSource: isMh ? 'drip_sprinkler' : 'canal',
+            waterLevel: 'adequate',
+            targetCrop: isMh ? 'Cotton' : 'Wheat',
+          };
+          generatePrecisionRecommendation(defaultInput).then((res) => {
+            setResult(res);
+            cacheLatestGeneratedPlan(res);
+          });
+        })
+        .catch(() => {
+          const fallbackInput: FarmerInput = {
+            location: {
+              region: 'Western Deccan Plateau & Ghats',
+              state: 'Maharashtra',
+              district: 'Nashik',
+              latitude: 19.9975,
+              longitude: 73.7898,
+              isGpsDetected: true,
+            },
+            landSize: 4,
+            landUnit: 'acres',
+            waterSource: 'drip_sprinkler',
+            waterLevel: 'adequate',
+            targetCrop: 'Cotton',
+          };
+          generatePrecisionRecommendation(fallbackInput).then((res) => {
+            setResult(res);
+            cacheLatestGeneratedPlan(res);
+          });
+        });
     }
   }, []);
 
@@ -257,6 +276,7 @@ export default function Home() {
         {/* Input Dashboard Form */}
         <section id="planner">
           <InputDashboard
+            initialInput={result?.input}
             language={language}
             onGenerate={handleGenerate}
             isLoading={isLoading}
@@ -529,27 +549,29 @@ export default function Home() {
         language={language}
         location={
           result?.input?.location || {
-            region: 'Malwa Agro-Zone',
-            state: 'Punjab',
-            district: 'Ludhiana',
-            latitude: 30.901,
-            longitude: 75.8573,
+            region: 'Western Deccan Plateau & Ghats',
+            state: 'Maharashtra',
+            district: 'Nashik',
+            latitude: 19.9975,
+            longitude: 73.7898,
+            isGpsDetected: true,
           }
         }
         liveWeather={result?.weather}
-        waterSource={result?.input?.waterSource || 'canal'}
+        waterSource={result?.input?.waterSource || 'drip_sprinkler'}
         onApplyPrediction={(detectedSoilType, recommendedCrop) => {
           const baseInput: FarmerInput = result?.input || {
             location: {
-              region: 'Malwa Agro-Zone',
-              state: 'Punjab',
-              district: 'Ludhiana',
-              latitude: 30.901,
-              longitude: 75.8573,
+              region: 'Western Deccan Plateau & Ghats',
+              state: 'Maharashtra',
+              district: 'Nashik',
+              latitude: 19.9975,
+              longitude: 73.7898,
+              isGpsDetected: true,
             },
-            landSize: 5,
+            landSize: 4,
             landUnit: 'acres',
-            waterSource: 'canal',
+            waterSource: 'drip_sprinkler',
             waterLevel: 'adequate',
           };
           const updatedInput: FarmerInput = {
