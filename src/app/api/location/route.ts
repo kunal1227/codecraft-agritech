@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { findNearestIndianDistrict } from '@/utils/indiaGeo';
 
 export const revalidate = 60; // 1 minute cache for location lookups
 
@@ -101,6 +102,9 @@ export async function GET(request: NextRequest) {
     const lon = parseFloat(lonStr);
 
     if (!isNaN(lat) && !isNaN(lon)) {
+      // Offline-safe mathematical centroid match as baseline ground truth
+      const nearestDistrict = findNearestIndianDistrict(lat, lon);
+
       // Primary Source: BigDataCloud Free Client Reverse Geocoding
       try {
         const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
@@ -111,10 +115,10 @@ export async function GET(request: NextRequest) {
 
         if (bdcRes.ok) {
           const bdcData = await bdcRes.json();
-          const state = bdcData.principalSubdivision || 'Maharashtra';
+          const state = bdcData.principalSubdivision || nearestDistrict.state;
           
           // Find district from administrative levels
-          let district = bdcData.city || bdcData.locality || '';
+          let district = '';
           if (Array.isArray(bdcData.localityInfo?.administrative)) {
             const districtObj = bdcData.localityInfo.administrative.find(
               (item: any) =>
@@ -123,10 +127,10 @@ export async function GET(request: NextRequest) {
                 item.adminLevel === 5
             );
             if (districtObj) {
-              district = districtObj.name.replace(/\s+district/i, '');
+              district = districtObj.name.replace(/\s+district/i, '').trim();
             }
           }
-          if (!district) district = bdcData.city || bdcData.locality || 'Field Region';
+          if (!district) district = bdcData.city || bdcData.locality || nearestDistrict.district;
 
           const city = bdcData.city || bdcData.locality || district;
           const region = getAgroZoneForState(state, district);
@@ -160,8 +164,9 @@ export async function GET(request: NextRequest) {
         if (nomRes.ok) {
           const nomData = await nomRes.json();
           const addr = nomData.address || {};
-          const state = addr.state || 'Maharashtra';
-          const district = addr.state_district || addr.county || addr.district || addr.city || 'Nashik';
+          const state = addr.state || nearestDistrict.state;
+          const districtRaw = addr.state_district || addr.county || addr.district || addr.city || nearestDistrict.district;
+          const district = districtRaw.replace(/\s+district/i, '').trim();
           const city = addr.city || addr.town || addr.village || addr.suburb || district;
           const region = getAgroZoneForState(state, district);
 
@@ -169,7 +174,7 @@ export async function GET(request: NextRequest) {
             latitude: Number(lat.toFixed(4)),
             longitude: Number(lon.toFixed(4)),
             state,
-            district: district.replace(/\s+district/i, ''),
+            district,
             city,
             region,
             country: addr.country || 'India',
@@ -182,12 +187,52 @@ export async function GET(request: NextRequest) {
       } catch (nomError) {
         console.warn('Nominatim fallback error:', nomError);
       }
+
+      // Tertiary Guaranteed Fallback: Indian District Geospatial Centroid Engine
+      const payload: ReverseGeoResult = {
+        latitude: Number(lat.toFixed(4)),
+        longitude: Number(lon.toFixed(4)),
+        state: nearestDistrict.state,
+        district: nearestDistrict.district,
+        city: nearestDistrict.district,
+        region: nearestDistrict.region,
+        country: 'India',
+        source: 'indian_agricultural_centroid_engine',
+        formattedAddress: `${nearestDistrict.district}, ${nearestDistrict.state}, India`,
+      };
+
+      return NextResponse.json({ success: true, data: payload });
     }
   }
 
   // 3. Real-Time IP Geolocation Auto-Detection (When GPS is pending/denied or ?auto=true)
   if (isAuto) {
-    // Try ipwho.is first
+    // Check Vercel edge geolocation headers first if present
+    const vercelLat = request.headers.get('x-vercel-ip-latitude');
+    const vercelLon = request.headers.get('x-vercel-ip-longitude');
+    if (vercelLat && vercelLon) {
+      const vLat = parseFloat(vercelLat);
+      const vLon = parseFloat(vercelLon);
+      if (!isNaN(vLat) && !isNaN(vLon)) {
+        const nearest = findNearestIndianDistrict(vLat, vLon);
+        return NextResponse.json({
+          success: true,
+          data: {
+            latitude: Number(vLat.toFixed(4)),
+            longitude: Number(vLon.toFixed(4)),
+            state: nearest.state,
+            district: nearest.district,
+            city: nearest.district,
+            region: nearest.region,
+            country: 'India',
+            source: 'vercel_edge_geolocation',
+            formattedAddress: `${nearest.district}, ${nearest.state}`,
+          },
+        });
+      }
+    }
+
+    // Try ipwho.is
     try {
       const clientIp =
         request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -206,20 +251,20 @@ export async function GET(request: NextRequest) {
       if (ipRes.ok) {
         const ipData = await ipRes.json();
         if (ipData.success !== false && ipData.latitude && ipData.longitude) {
-          const state = ipData.region || 'Maharashtra';
-          const district = ipData.city || 'Nashik';
-          const region = getAgroZoneForState(state, district);
+          const ipLat = parseFloat(ipData.latitude);
+          const ipLon = parseFloat(ipData.longitude);
+          const nearest = findNearestIndianDistrict(ipLat, ipLon);
 
           const payload: ReverseGeoResult = {
-            latitude: Number(Number(ipData.latitude).toFixed(4)),
-            longitude: Number(Number(ipData.longitude).toFixed(4)),
-            state,
-            district,
-            city: ipData.city || district,
-            region,
+            latitude: Number(ipLat.toFixed(4)),
+            longitude: Number(ipLon.toFixed(4)),
+            state: nearest.state,
+            district: nearest.district,
+            city: ipData.city || nearest.district,
+            region: nearest.region,
             country: ipData.country || 'India',
             source: 'live_realtime_ip_geolocation',
-            formattedAddress: `${ipData.city || district}, ${state}, ${ipData.country || 'India'}`,
+            formattedAddress: `${ipData.city || nearest.district}, ${nearest.state}, ${ipData.country || 'India'}`,
           };
 
           return NextResponse.json({ success: true, data: payload });
@@ -227,39 +272,6 @@ export async function GET(request: NextRequest) {
       }
     } catch (ipWhoError) {
       console.warn('ipwho.is failed, trying ipapi.co fallback:', ipWhoError);
-    }
-
-    // Secondary IP Fallback: ipapi.co
-    try {
-      const ipApiRes = await fetch('https://ipapi.co/json/', {
-        headers: { 'User-Agent': 'AgriTech-App/1.0' },
-        next: { revalidate: 300 },
-      });
-
-      if (ipApiRes.ok) {
-        const ipApiData = await ipApiRes.json();
-        if (ipApiData.latitude && ipApiData.longitude) {
-          const state = ipApiData.region || 'Maharashtra';
-          const district = ipApiData.city || 'Nashik';
-          const region = getAgroZoneForState(state, district);
-
-          const payload: ReverseGeoResult = {
-            latitude: Number(Number(ipApiData.latitude).toFixed(4)),
-            longitude: Number(Number(ipApiData.longitude).toFixed(4)),
-            state,
-            district,
-            city: ipApiData.city || district,
-            region,
-            country: ipApiData.country_name || 'India',
-            source: 'live_ipapi_geolocation',
-            formattedAddress: `${ipApiData.city || district}, ${state}`,
-          };
-
-          return NextResponse.json({ success: true, data: payload });
-        }
-      }
-    } catch (ipApiError) {
-      console.warn('ipapi.co failed:', ipApiError);
     }
   }
 

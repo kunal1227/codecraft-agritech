@@ -30,6 +30,7 @@ import {
 import { parseFarmVoiceInput, SPEECH_LANG_CODES } from '@/utils/speech';
 import {
   detectRealTimeLocation,
+  acquireHardwareGps,
   searchRealTimeLocations,
   LocationSearchResult,
 } from '@/services/locationService';
@@ -85,7 +86,7 @@ export function InputDashboard({
   const defaultInitialLocation = REGIONS[0];
 
   // Form State
-  const [selectedRegionIdx, setSelectedRegionIdx] = useState<number>(0);
+  const [selectedRegionIdx, setSelectedRegionIdx] = useState<number | 'custom'>('custom');
   const [customLocation, setCustomLocation] = useState<LocationData>(
     initialInput?.location || defaultInitialLocation
   );
@@ -117,10 +118,14 @@ export function InputDashboard({
           setGpsLocked(true);
         }
         const matchedIdx = REGIONS.findIndex(
-          (r) => r.state.toLowerCase() === initialInput.location?.state.toLowerCase()
+          (r) =>
+            r.district.toLowerCase() === initialInput.location?.district?.toLowerCase() &&
+            r.state.toLowerCase() === initialInput.location?.state?.toLowerCase()
         );
         if (matchedIdx !== -1) {
           setSelectedRegionIdx(matchedIdx);
+        } else {
+          setSelectedRegionIdx('custom');
         }
       }
       if (initialInput.landSize) setLandSize(initialInput.landSize);
@@ -136,17 +141,22 @@ export function InputDashboard({
     setIsDetectingGps(true);
     setVoiceFeedback(
       language === 'mr'
-        ? '🛰️ थेट GPS व वास्तव लोकेशन मिळवत आहे...'
-        : '🛰️ Detecting live GPS satellite coordinates & district...'
+        ? '🛰️ थेट उपग्रह GPS शोधत आहे... कृपया मोबाईलवर परवानगी द्या.'
+        : '🛰️ Querying hardware GPS satellites... please allow location if prompted.'
     );
 
     try {
-      const realLocation = await detectRealTimeLocation();
+      // 1. Direct Hardware GPS acquisition with 15s timeout
+      const realLocation = await acquireHardwareGps();
       setCustomLocation(realLocation);
       setGpsLocked(true);
+      setSelectedRegionIdx('custom');
+      setSearchQuery(`${realLocation.district}, ${realLocation.state}`);
 
       const matchedIdx = REGIONS.findIndex(
-        (r) => r.state.toLowerCase() === realLocation.state.toLowerCase()
+        (r) =>
+          r.district.toLowerCase() === realLocation.district.toLowerCase() &&
+          r.state.toLowerCase() === realLocation.state.toLowerCase()
       );
       if (matchedIdx !== -1) {
         setSelectedRegionIdx(matchedIdx);
@@ -154,11 +164,41 @@ export function InputDashboard({
 
       setVoiceFeedback(
         language === 'mr'
-          ? `📍 वास्तव लोकेशन निश्चित: ${realLocation.district}, ${realLocation.state} (${realLocation.latitude}°N, ${realLocation.longitude}°E)`
-          : `📍 Real-Time Location Locked: ${realLocation.district}, ${realLocation.state} (${realLocation.latitude}°N, ${realLocation.longitude}°E)`
+          ? `📍 थेट GPS निश्चित: ${realLocation.district}, ${realLocation.state} (${realLocation.latitude.toFixed(4)}°N, ${realLocation.longitude.toFixed(4)}°E)`
+          : `📍 Live Hardware GPS Locked: ${realLocation.district}, ${realLocation.state} (${realLocation.latitude.toFixed(4)}°N, ${realLocation.longitude.toFixed(4)}°E)`
       );
-    } catch (err) {
-      console.warn('Real-time location detection error:', err);
+    } catch (err: any) {
+      console.warn('Hardware GPS failed, evaluating fallback:', err);
+      const isDenied = err?.code === 1 || err?.message === 'PERMISSION_DENIED';
+
+      if (isDenied) {
+        setGpsLocked(false);
+        setVoiceFeedback(
+          language === 'mr'
+            ? '⚠️ GPS परवानगी नाकारली आहे. कृपया ब्राउझर सेटिंग्जमध्ये लोकेशन चालू करा, किंवा खालील शोध पेटीतून आपला जिल्हा निवडा.'
+            : '⚠️ GPS permission denied. Please allow location access in your browser or search your district below.'
+        );
+      } else {
+        // Fallback to IP geolocation estimation without claiming false hardware GPS
+        try {
+          const fallbackLoc = await detectRealTimeLocation();
+          setCustomLocation(fallbackLoc);
+          setGpsLocked(false);
+          setSelectedRegionIdx('custom');
+          setSearchQuery(`${fallbackLoc.district}, ${fallbackLoc.state}`);
+          setVoiceFeedback(
+            language === 'mr'
+              ? `📡 GPS सिग्नल उपलब्ध नाही. नेटवर्क अंदाज: ${fallbackLoc.district}, ${fallbackLoc.state}. आपण वरून अचूक जिल्हा शोधू शकता.`
+              : `📡 GPS satellite lock timed out. Estimated via network: ${fallbackLoc.district}, ${fallbackLoc.state}. You can search above to refine.`
+          );
+        } catch {
+          setVoiceFeedback(
+            language === 'mr'
+              ? '⚠️ लोकेशन शोधता आले नाही. कृपया वरील शोध पेटीतून आपला जिल्हा निवडा.'
+              : '⚠️ Unable to detect location. Please use the search bar above to select your district.'
+          );
+        }
+      }
     } finally {
       setIsDetectingGps(false);
     }
@@ -196,15 +236,24 @@ export function InputDashboard({
     setShowSearchDropdown(false);
 
     const matchedIdx = REGIONS.findIndex(
-      (r) => r.state.toLowerCase() === item.state.toLowerCase()
+      (r) =>
+        r.district.toLowerCase() === item.district.toLowerCase() &&
+        r.state.toLowerCase() === item.state.toLowerCase()
     );
     if (matchedIdx !== -1) {
       setSelectedRegionIdx(matchedIdx);
+    } else {
+      setSelectedRegionIdx('custom');
     }
   };
 
   // Handle Region Dropdown Change
-  const handleRegionChange = (idx: number) => {
+  const handleRegionChange = (val: string) => {
+    if (val === 'custom') {
+      setSelectedRegionIdx('custom');
+      return;
+    }
+    const idx = Number(val);
     setSelectedRegionIdx(idx);
     setCustomLocation(REGIONS[idx]);
     setGpsLocked(false);
@@ -544,9 +593,14 @@ export function InputDashboard({
             {/* Quick state / zone preset selector */}
             <select
               value={selectedRegionIdx}
-              onChange={(e) => handleRegionChange(Number(e.target.value))}
+              onChange={(e) => handleRegionChange(e.target.value)}
               className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
             >
+              {selectedRegionIdx === 'custom' && (
+                <option value="custom">
+                  📍 {customLocation.isGpsDetected ? 'GPS' : 'Live'}: {customLocation.district}, {customLocation.state} ({customLocation.latitude.toFixed(2)}°N, {customLocation.longitude.toFixed(2)}°E)
+                </option>
+              )}
               {REGIONS.map((r, idx) => (
                 <option key={`${r.state}-${r.district}`} value={idx}>
                   {r.state} — {r.district} ({r.region})

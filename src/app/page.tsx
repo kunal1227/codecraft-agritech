@@ -116,7 +116,7 @@ export default function Home() {
               district: 'Nashik',
               latitude: 19.9975,
               longitude: 73.7898,
-              isGpsDetected: true,
+              isGpsDetected: false,
             },
             landSize: 4,
             landUnit: 'acres',
